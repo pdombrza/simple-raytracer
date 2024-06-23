@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDebug$<$<CONFIG:Debug>:Debug>") #we want to use the static runtime
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDebug$<$<CONFIG:Debug>:Debug>")
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
 
 project(raytracer)
+
+add_subdirectory(thirdparty/glm)
 
 
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
@@ -12,9 +14,11 @@ file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/
 file(GLOB_RECURSE MODULE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/sources/*")
 
 # here add subdirectory created in your module
-add_subdirectory(sources/temp)
+add_subdirectory(sources/color)
+add_subdirectory(sources/tobmp)
 
 add_executable("${CMAKE_PROJECT_NAME}")
+add_compile_definitions(SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
 
 set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 20)
 
@@ -28,8 +32,8 @@ if(MSVC) # Microsoft Visual Studio
 
 endif()
 
-# here add directories with your own module
-target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/sources/shader")
+target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
-# here link against library created in your module
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE TempLib)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Color Tobmp)
+
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm)

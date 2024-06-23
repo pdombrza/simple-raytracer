@@ -1,22 +1,34 @@
 #include <iostream>
+#include <sstream>
+#include <fstream>
+
+#include <glm/glm.hpp>
+
+#include <color.h>
+#include <tobmp.h>
 
 int main() {
 	const int imgWidth = 256;
 	const int imgHeight = 256;
 
-	std::cout << "P3\n" << imgWidth << ' ' << imgHeight << "\n255\n";
+	// ppm header
+	std::stringstream stream;
+	//std::ofstream ppmFile(SOURCE_ROOT "/img.ppm");
+	stream << "P3\n" << imgWidth << ' ' << imgHeight << "\n255\n";
 
 	for (size_t i = 0; i < imgHeight; i++) {
 		for (size_t j = 0; j < imgWidth; j++) {
-			double r = (double)i / (imgWidth - 1);
-			double g = (double)j / (imgHeight - 1);
-			double b = 0.0;
-			double rFormatted = 255.999 * r;
-			double gFormatted = 255.999 * g;
-			double bFormatted = 255.999 * b;
-
-			std::cout << rFormatted << ' ' << gFormatted << ' ' << bFormatted << '\n';
+			glm::vec3 pixelColor = glm::vec3((float)i/(imgWidth-1), (float)j/(imgHeight-1), 0.f);
+			writeColorToStream(stream, pixelColor);
 		}
+	}
+
+	std::string outPath = SOURCE_ROOT "/output.bmp";
+	int res = writeBMP(SOURCE_ROOT "/output.bmp", stream);
+
+	if (res<0) {
+		std::cerr << "Failed to create bmp file!" << std::endl;
+		return -1;
 	}
 
 	return 0;
