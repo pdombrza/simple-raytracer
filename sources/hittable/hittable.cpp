@@ -5,24 +5,25 @@ HitRecord Sphere::constructHitRecord(const Ray& ray, float t) const {
 	HitRecord rec{};
 	rec.t = t;
 	rec.p = ray.At(t);
-	rec.normal = glm::normalize(rec.p - center);
-	rec.normal = rec.normal * radius;
+	glm::vec3 outwardNormal = glm::normalize(rec.p - center);
+	outwardNormal *= sign(radius);
+	rec.setFaceNormal(ray, outwardNormal);
 	return rec;
 }
 
-std::optional<HitRecord> Sphere::testHit(const Ray& ray, float rayTMin, float rayTMax) const {
+std::optional<HitRecord> Sphere::hit(const Ray& ray, float rayTMin, float rayTMax) const {
 	glm::vec3 distOC = center - ray.getOrigin();
 	float a = glm::dot(ray.getDirection(), ray.getDirection());
-	float h = glm::dot(ray.getDirection(), distOC);
+	float halfb = glm::dot(ray.getDirection(), distOC);
 	float c = glm::dot(distOC, distOC) - radius * radius;
-	float delta = h * h - a * c;
+	float delta = halfb * halfb - a * c;
 	if (delta < 0)
 		return {};
 
-	float sqrtDelta = sqrt(delta);
-	float root = (h - sqrtDelta) / a;
+	float sqrtDelta = std::sqrt(delta);
+	float root = (halfb - sqrtDelta) / a;
 	if (root < rayTMin || root >= rayTMax) {
-		root = (h + sqrtDelta) / a;
+		root = (halfb + sqrtDelta) / a;
 		if (root < rayTMin || root >= rayTMax) {
 			return {};
 		}
