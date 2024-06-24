@@ -17,6 +17,8 @@ file(GLOB_RECURSE MODULE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/sources/*")
 add_subdirectory(sources/color)
 add_subdirectory(sources/tobmp)
 add_subdirectory(sources/ray)
+add_subdirectory(sources/hitrec)
+add_subdirectory(sources/hittable)
 
 add_executable("${CMAKE_PROJECT_NAME}")
 add_compile_definitions(SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
@@ -35,6 +37,6 @@ endif()
 
 target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Color Tobmp Ray)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Color Tobmp Ray HitRecord Hittable)
 
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm)

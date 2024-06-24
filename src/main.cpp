@@ -2,6 +2,7 @@
 #include <sstream>
 #include <fstream>
 #include <algorithm>
+#include <string_view>
 
 #include <glm/glm.hpp>
 
@@ -9,20 +10,27 @@
 #include <ray.h>
 #include <tobmp.h>
 
-static bool hitSphere(const glm::vec3& center, float radius, const Ray& ray) {
+static float hitSphere(const glm::vec3& center, float radius, const Ray& ray) {
 	glm::vec3 distOC = center - ray.getOrigin();
 	float a = glm::dot(ray.getDirection(), ray.getDirection());
-	float b = -2.0f * glm::dot(ray.getDirection(), distOC);
+	float h = glm::dot(ray.getDirection(), distOC);
 	float c = glm::dot(distOC, distOC) - radius * radius;
-	float delta = b * b - 4.0f * a * c;
-	return delta >= 0;
+	float delta = h * h - a * c;
+	if (delta < 0)
+		return -1.0f;
+	else
+		return (h - sqrt(delta)) / a;
 }
-
-static glm::vec3 rayColor(const Ray& r) {
+   
+static glm::vec3 rayColor(const Ray& ray) {
 	// gradient
-	if (hitSphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f, r))
-		return glm::vec3(1.0f, 0.0f, 0.0f);
-	glm::vec3 directionNormalized = r.getDirection();
+	float t = hitSphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f, ray);
+	if (t > 0.0f) {
+		glm::vec3 normal = glm::normalize(ray.At(t) - glm::vec3(0.0f, 0.0f, -1.0f));
+		return 0.5f * glm::vec3(normal.x + 1.0f, normal.y + 1.0f, normal.z + 1.0f);
+	}
+
+	glm::vec3 directionNormalized = ray.getDirection();
 	float a = 0.5f * (directionNormalized.y + 1.0f);
 	return (1.0f - a) * glm::vec3(1.0f, 1.0f, 1.0f) + a * glm::vec3(0.5f, 0.7f, 1.0f);
 }
@@ -64,7 +72,7 @@ int main() {
 		}
 	}
 
-	std::string outPath = SOURCE_ROOT "/output.bmp";
+	std::string_view outPath = SOURCE_ROOT "/output.bmp";
 	int res = writeBMP(SOURCE_ROOT "/output.bmp", stream);
 
 	if (res<0) {
