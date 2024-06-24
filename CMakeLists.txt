@@ -16,6 +16,7 @@ file(GLOB_RECURSE MODULE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/sources/*")
 # here add subdirectory created in your module
 add_subdirectory(sources/color)
 add_subdirectory(sources/tobmp)
+add_subdirectory(sources/ray)
 
 add_executable("${CMAKE_PROJECT_NAME}")
 add_compile_definitions(SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
@@ -34,6 +35,6 @@ endif()
 
 target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Color Tobmp)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Color Tobmp Ray)
 
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm)
