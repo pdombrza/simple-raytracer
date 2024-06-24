@@ -9,8 +9,19 @@
 #include <ray.h>
 #include <tobmp.h>
 
+static bool hitSphere(const glm::vec3& center, float radius, const Ray& ray) {
+	glm::vec3 distOC = center - ray.getOrigin();
+	float a = glm::dot(ray.getDirection(), ray.getDirection());
+	float b = -2.0f * glm::dot(ray.getDirection(), distOC);
+	float c = glm::dot(distOC, distOC) - radius * radius;
+	float delta = b * b - 4.0f * a * c;
+	return delta >= 0;
+}
+
 static glm::vec3 rayColor(const Ray& r) {
 	// gradient
+	if (hitSphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f, r))
+		return glm::vec3(1.0f, 0.0f, 0.0f);
 	glm::vec3 directionNormalized = r.getDirection();
 	float a = 0.5f * (directionNormalized.y + 1.0f);
 	return (1.0f - a) * glm::vec3(1.0f, 1.0f, 1.0f) + a * glm::vec3(0.5f, 0.7f, 1.0f);
