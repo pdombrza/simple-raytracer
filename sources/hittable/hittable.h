@@ -19,7 +19,7 @@ class Hittable {
 public:
 	virtual ~Hittable() = default;
 	virtual std::optional<HitRecord> hit(const Ray& ray, float rayTMin, float rayTMax) const = 0;
-	virtual HitRecord constructHitRecord(const Ray& ray, float rayTMin, float rayTMax) const = 0;
+	virtual HitRecord constructHitRecord(const Ray& ray, float t) const = 0;
 };
 
 

@@ -3,35 +3,30 @@
 #include <fstream>
 #include <algorithm>
 #include <string_view>
+#include <optional>
+#include <memory>
 
 #include <glm/glm.hpp>
 
 #include <color.h>
 #include <ray.h>
 #include <tobmp.h>
+#include <hittable.h>
+#include <hitrec.h>
+#include <hittablelist.h>
 
-static float hitSphere(const glm::vec3& center, float radius, const Ray& ray) {
-	glm::vec3 distOC = center - ray.getOrigin();
-	float a = glm::dot(ray.getDirection(), ray.getDirection());
-	float h = glm::dot(ray.getDirection(), distOC);
-	float c = glm::dot(distOC, distOC) - radius * radius;
-	float delta = h * h - a * c;
-	if (delta < 0)
-		return -1.0f;
-	else
-		return (h - sqrt(delta)) / a;
-}
+#define INF std::numeric_limits<float>::max()
    
-static glm::vec3 rayColor(const Ray& ray) {
-	// gradient
-	float t = hitSphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f, ray);
-	if (t > 0.0f) {
-		glm::vec3 normal = glm::normalize(ray.At(t) - glm::vec3(0.0f, 0.0f, -1.0f));
-		return 0.5f * glm::vec3(normal.x + 1.0f, normal.y + 1.0f, normal.z + 1.0f);
+glm::vec3 rayColor(const Ray& ray, const HittableList& world) {
+	std::optional<HitRecord> rec = world.hit(ray, 0, INF);
+	if (rec.has_value()) {
+		auto hitColor = 0.5f * (rec.value().normal + glm::vec3(1.0f, 1.0f, 1.0f));
+		return hitColor;
 	}
 
-	glm::vec3 directionNormalized = ray.getDirection();
-	float a = 0.5f * (directionNormalized.y + 1.0f);
+	// gradient 
+	glm::vec3 direction = ray.getDirection();
+	float a = 0.5f * (direction.y + 1.0f);
 	return (1.0f - a) * glm::vec3(1.0f, 1.0f, 1.0f) + a * glm::vec3(0.5f, 0.7f, 1.0f);
 }
 
@@ -41,6 +36,11 @@ int main() {
 
 	int imgHeight = (int) (imgWidth / aspectRatio);
 	imgHeight = std::max(1, imgHeight);
+
+	HittableList scene{};
+
+	scene.add(std::make_shared<Sphere>(glm::vec3(0.0f, -100.5f, -1.1f), 100.0f));
+	scene.add(std::make_shared<Sphere>(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f));
 
 
 	float focalLength = 1.0f;
@@ -59,7 +59,6 @@ int main() {
 		
 
 	std::stringstream stream;
-	std::ofstream ppmFile(SOURCE_ROOT "/img.ppm");
 	stream << "P3\n" << imgWidth << ' ' << imgHeight << "\n255\n";
 
 	for (size_t i = 0; i < imgHeight; i++) {
@@ -67,7 +66,7 @@ int main() {
 			glm::vec3 pixelCenter = startPixelLoc + ((float)j * pixelDeltaU) + ((float)i * pixelDeltaV);
 			glm::vec3 rayDirection = pixelCenter - cameraCenter;
 			Ray r(cameraCenter, rayDirection);
-			glm::vec3 pxColor = rayColor(r);
+			glm::vec3 pxColor = rayColor(r, scene);
 			writeColorToStream(stream, pxColor);
 		}
 	}
