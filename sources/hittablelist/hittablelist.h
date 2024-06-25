@@ -16,5 +16,5 @@ public:
 	HittableList() = default;
 	void clear();
 	void add(std::shared_ptr<Hittable> hittable);
-	HitRecord hit(const Ray& ray, float rayTMin, float rayTMax) const;
+	std::optional<HitRecord> hit(const Ray& ray, float rayTMin, float rayTMax) const;
 };

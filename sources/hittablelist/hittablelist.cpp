@@ -11,7 +11,7 @@ void HittableList::add(std::shared_ptr<Hittable> hittable) {
 	objects.push_back(hittable);
 }
 
-HitRecord HittableList::hit(const Ray& ray, float rayTMin, float rayTMax) const {
+std::optional<HitRecord> HittableList::hit(const Ray& ray, float rayTMin, float rayTMax) const {
 	HitRecord rec{};
 	bool hitAnything = false;
 	float closestDist = rayTMax;
@@ -25,5 +25,6 @@ HitRecord HittableList::hit(const Ray& ray, float rayTMin, float rayTMax) const 
 			closestRecord = &tempRec.value();
 		}
 	}
-	return *closestRecord; // TODO: fix since potencially dereferencing nullptr (this mf might crash) mb rewrite to std::optional? too tired for now
+	if (!closestRecord) return {};
+	return *closestRecord;
 }
