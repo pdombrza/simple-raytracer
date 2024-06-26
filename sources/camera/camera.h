@@ -5,6 +5,7 @@
 #include "hittable.h"
 #include "hitrec.h"
 #include "ray.h"
+#include "utils.h"
 
 
 class Camera {
@@ -22,6 +23,7 @@ public:
 	Camera(float aspectRatio, float focalLength, float viewportHeight, const glm::vec3& center) : aspectRatio(aspectRatio), focalLength(focalLength), viewportHeight(viewportHeight), center(center) {};
 	~Camera() = default;
 	void initialize(int imgWidth, int imgHeight);
+	Ray getRay(float h, float w) const;
 	void setAspectRatio(float newAspectRatio) { aspectRatio = newAspectRatio; };
 	float getAspectRatio() const { return aspectRatio; };
 	void setViewportHeight(float newViewportHeight) { viewportHeight = newViewportHeight; };

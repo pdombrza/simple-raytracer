@@ -11,7 +11,6 @@
 #include "camera.h"
 #include "tobmp.h"
 #include "color.h"
-#include "utils.h"
 
 
 class IRenderer {
@@ -19,7 +18,7 @@ private:
 	virtual glm::vec3 calcRayColor(const Ray& ray) = 0;
 public:
 	virtual ~IRenderer() = default;
-	virtual int render(Camera& camera) = 0; // logically this should be const... maybe change structure later?
+	virtual int render(Camera& camera) = 0;
 	virtual void setScene(HittableList& newScene) = 0;
 	virtual HittableList getScene() const = 0;
 };
@@ -30,12 +29,14 @@ private:
 	HittableList scene;
 	glm::vec3 calcRayColor(const Ray& ray);
 	int imgWidth = 400;
+	int samplesPerPixel = 32;
 	int imgHeight{};
+	float pixelSamplesScale{};
 public:
 	BMPRenderer(HittableList& scene) : scene(scene) {};
-	BMPRenderer(HittableList& scene, int imgWidth) : scene(scene), imgWidth(imgWidth) {};
+	BMPRenderer(HittableList& scene, int imgWidth, int samplesPerPixel) : scene(scene), imgWidth(imgWidth), samplesPerPixel(samplesPerPixel) {};
 	~BMPRenderer() = default;
-	int render(Camera& camera);  // ... same thing
+	int render(Camera& camera); 
 	void setScene(HittableList& newScene) { scene = newScene; };
 	HittableList getScene() const { return scene; };
 	void setImgWidth(float newImgWidth) { imgWidth = newImgWidth; };

@@ -16,17 +16,19 @@ glm::vec3 BMPRenderer::calcRayColor(const Ray& ray) {
 int BMPRenderer::render(Camera& camera) {
 	imgHeight = (int)(imgWidth / camera.getAspectRatio());
 	imgHeight = std::max(1, imgHeight);
+	pixelSamplesScale = 1.0f / samplesPerPixel;
 	camera.initialize(imgWidth, imgHeight);
-	std::stringstream stream;
+	std::stringstream stream{};
 	stream << "P3\n" << imgWidth << ' ' << imgHeight << "\n255\n";
 
 	for (size_t i = 0; i < imgHeight; i++) {
 		for (size_t j = 0; j < imgWidth; j++) {
-			glm::vec3 pixelCenter = camera.getStartPixelLoc() + ((float)j * camera.getPixelDeltaU()) + ((float)i * camera.getPixelDeltaV());
-			glm::vec3 rayDirection = pixelCenter - camera.getCenter();
-			Ray r(camera.getCenter(), rayDirection);
-			glm::vec3 pxColor = calcRayColor(r);
-			writeColorToStream(stream, pxColor);
+			glm::vec3 pxColor(0.0f, 0.0f, 0.0f);
+			for (int sample = 0; sample < samplesPerPixel; sample++) {
+				Ray r = camera.getRay(j, i);
+				pxColor += calcRayColor(r);
+			}
+			writeColorToStream(stream, pixelSamplesScale * pxColor);
 		}
 	}
 

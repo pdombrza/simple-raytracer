@@ -10,11 +10,14 @@
 
 int main() {
 	HittableList scene{};
-
 	scene.add(std::make_shared<Sphere>(glm::vec3(0.0f, -100.5f, -1.1f), 100.0f));
 	scene.add(std::make_shared<Sphere>(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f));
+
 	Camera cam{};
-	BMPRenderer renderer(scene);
+	int imgWidth = 400;
+	int samplesPerPixel = 32;
+	BMPRenderer renderer(scene, imgWidth, samplesPerPixel);
+
 	int result = renderer.render(cam);
 	if (result < 0) {
 		std::cerr << "It's over" << std::endl;
