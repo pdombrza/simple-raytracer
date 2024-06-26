@@ -22,6 +22,7 @@ add_subdirectory(sources/hittable)
 add_subdirectory(sources/hittablelist)
 add_subdirectory(sources/camera)
 add_subdirectory(sources/renderer)
+add_subdirectory(sources/utils)
 
 add_executable("${CMAKE_PROJECT_NAME}")
 add_compile_definitions(SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
@@ -40,6 +41,6 @@ endif()
 
 target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Color Tobmp Ray HitRecord Hittable HittableList Camera Renderer)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Color Tobmp Ray HitRecord Hittable HittableList Camera Renderer Utils)
 
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm)

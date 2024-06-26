@@ -11,9 +11,7 @@
 #include "camera.h"
 #include "tobmp.h"
 #include "color.h"
-
-
-#define INF std::numeric_limits<float>::max()
+#include "utils.h"
 
 
 class IRenderer {

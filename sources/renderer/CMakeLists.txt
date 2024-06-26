@@ -13,3 +13,4 @@ target_include_directories(Renderer PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../hitta
 target_include_directories(Renderer PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../camera")
 target_include_directories(Renderer PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../tobmp")
 target_include_directories(Renderer PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../color")
+target_include_directories(Renderer PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../utils")
