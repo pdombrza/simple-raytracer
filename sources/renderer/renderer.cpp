@@ -1,10 +1,13 @@
 #include "renderer.h"
 
-glm::vec3 BMPRenderer::calcRayColor(const Ray& ray) {
+glm::vec3 BMPRenderer::calcRayColor(const Ray& ray, int depth) {
+	if (depth < 0)
+		return glm::vec3(0.0f, 0.0f, 0.0f); // if exceeds maxdepth do not generate more light
 	std::optional<HitRecord> rec = scene.hit(ray, 0, INF);
 	if (rec.has_value()) {
-		auto hitColor = 0.5f * (rec.value().normal + glm::vec3(1.0f, 1.0f, 1.0f));
-		return hitColor;
+		HitRecord hitrec = rec.value();
+		glm::vec3 direction = Utils::random::randomVec3OnHemisphere(hitrec.normal);
+		return 0.5f * calcRayColor(Ray(hitrec.p, direction), depth - 1);
 	}
 
 	// gradient 
@@ -26,7 +29,7 @@ int BMPRenderer::render(Camera& camera) {
 			glm::vec3 pxColor(0.0f, 0.0f, 0.0f);
 			for (int sample = 0; sample < samplesPerPixel; sample++) {
 				Ray r = camera.getRay(j, i);
-				pxColor += calcRayColor(r);
+				pxColor += calcRayColor(r, maxDepth);
 			}
 			writeColorToStream(stream, pixelSamplesScale * pxColor);
 		}

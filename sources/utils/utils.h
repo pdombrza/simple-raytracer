@@ -1,5 +1,6 @@
 #pragma once
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <random>
 
@@ -32,5 +33,19 @@ namespace Utils::random {
 	inline glm::vec3 randomVec3Norm() {
 		glm::vec3 res = randomVec3(0.0f, 1.0f);
 		return res;
+	}
+
+	inline glm::vec3 randomVec3InSphere() {
+		while (true) {
+			glm::vec3 randomVec = (randomVec3Norm() - 0.5f) / 2.0f;
+			if (std::pow(glm::length(randomVec), 2) < 1)
+				return glm::normalize(randomVec);
+		}
+	}
+
+	inline glm::vec3 randomVec3OnHemisphere(const glm::vec3& normal) {
+		glm::vec3 onUnitSphere = randomVec3InSphere();
+		onUnitSphere = (glm::dot(onUnitSphere, normal) > 0.0f) ? onUnitSphere : -onUnitSphere;
+		return onUnitSphere;
 	}
 }
