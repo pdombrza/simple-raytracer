@@ -14,7 +14,7 @@ void Camera::initialize(int imgWidth, int imgHeight) {
 }
 
 Ray Camera::getRay(float u, float v) const {
-	glm::vec3 offset = sampleSquare();
+	glm::vec3 offset = Utils::random::sampleSquare();
 	glm::vec3 pixelSample = startPixelLoc + (u + offset.x) * pixelDeltaU + (v + offset.y) * pixelDeltaV;
 	glm::vec3 rayOrigin = center;
 	glm::vec3 rayDirection = pixelSample - rayOrigin;
