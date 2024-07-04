@@ -15,8 +15,8 @@ int main() {
 
 	Camera cam{};
 	int imgWidth = 400;
-	int samplesPerPixel = 32;
-	int maxDepth = 16;
+	int samplesPerPixel = 64;
+	int maxDepth = 50;
 	BMPRenderer renderer(scene, imgWidth, samplesPerPixel, maxDepth);
 
 	int result = renderer.render(cam);

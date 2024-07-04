@@ -3,7 +3,7 @@
 glm::vec3 BMPRenderer::calcRayColor(const Ray& ray, int depth) {
 	if (depth < 0)
 		return glm::vec3(0.0f, 0.0f, 0.0f); // if exceeds maxdepth do not generate more light
-	std::optional<HitRecord> rec = scene.hit(ray, 0, INF);
+	std::optional<HitRecord> rec = scene.hit(ray, 0.001f, INF);
 	if (rec.has_value()) {
 		HitRecord hitrec = rec.value();
 		glm::vec3 direction = Utils::random::randomVec3OnHemisphere(hitrec.normal);
