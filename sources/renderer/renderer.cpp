@@ -6,7 +6,7 @@ glm::vec3 BMPRenderer::calcRayColor(const Ray& ray, int depth) {
 	std::optional<HitRecord> rec = scene.hit(ray, 0.001f, INF);
 	if (rec.has_value()) {
 		HitRecord hitrec = rec.value();
-		glm::vec3 direction = Utils::random::randomVec3OnHemisphere(hitrec.normal);
+		glm::vec3 direction = hitrec.normal + glm::normalize(Utils::random::randomVec3Norm());
 		return 0.5f * calcRayColor(Ray(hitrec.p, direction), depth - 1);
 	}
 
