@@ -37,7 +37,7 @@ namespace Utils::random {
 
 	inline glm::vec3 randomVec3InSphere() {
 		while (true) {
-			glm::vec3 randomVec = (randomVec3Norm() - 0.5f) / 2.0f;
+			glm::vec3 randomVec = (randomVec3Norm() - 0.5f) * 2.0f;
 			if (std::pow(glm::length(randomVec), 2) < 1)
 				return glm::normalize(randomVec);
 		}
