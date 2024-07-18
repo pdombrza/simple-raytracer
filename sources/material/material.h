@@ -9,4 +9,3 @@ public:
 	virtual Ray scatter(const Ray& ray_in, const HitRecord& hitrec, glm::vec3& attenuation) const = 0;
 };
 
-
