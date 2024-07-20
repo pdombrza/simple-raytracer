@@ -24,14 +24,15 @@ add_subdirectory(sources/camera)
 add_subdirectory(sources/renderer)
 add_subdirectory(sources/utils)
 add_subdirectory(sources/material)
+add_subdirectory(sources/scattering_record)
 
 add_executable("${CMAKE_PROJECT_NAME}")
 add_compile_definitions(SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
 
 set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 20)
 
-
 target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES} )
+
 
 if(MSVC) # Microsoft Visual Studio
 	target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC _CRT_SECURE_NO_WARNINGS)
@@ -42,6 +43,6 @@ endif()
 
 target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Color Tobmp Ray HitRecord Hittable HittableList Camera Renderer Utils Material)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Color Tobmp Ray HitRecord Hittable HittableList Camera Renderer Utils Material ScatteringRecord)
 
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm)

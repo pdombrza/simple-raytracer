@@ -9,3 +9,4 @@ target_include_directories(Camera PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../hitrec"
 target_include_directories(Camera PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../hittable")
 target_include_directories(Camera PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../utils")
 target_include_directories(Camera PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../material")
+target_include_directories(Camera PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../scattering_record")

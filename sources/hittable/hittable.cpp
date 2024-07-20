@@ -32,7 +32,10 @@ std::optional<HitRecord> Sphere::hit(const Ray& ray, float rayTMin, float rayTMa
 	return record;
 }
 
+void Sphere::setMaterial(std::shared_ptr<Material> mat) {
+	material = mat;
+}
 
-void Sphere::setMaterial(std::unique_ptr<Material> mat) {
-	material = std::move(mat);
+std::shared_ptr<Material> Sphere::getMaterial() const {
+	return material;
 }

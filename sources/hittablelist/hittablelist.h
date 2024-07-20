@@ -5,6 +5,8 @@
 #include <optional>
 
 #include "hittable.h"
+#include "material.h"
+#include "utils.h"
 #include "hitrec.h"
 #include "ray.h"
 

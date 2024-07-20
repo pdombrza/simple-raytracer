@@ -8,6 +8,7 @@
 #include "ray.h"
 #include "hitrec.h"
 #include "hittablelist.h"
+#include "material.h"
 #include "camera.h"
 #include "tobmp.h"
 #include "color.h"

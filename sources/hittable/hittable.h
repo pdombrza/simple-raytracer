@@ -7,8 +7,8 @@
 #include <glm/glm.hpp>
 #include "ray.h"
 #include "hitrec.h"
+#include "utils.h"
 #include "material.h"
-
 
 
 template<typename T>
@@ -30,11 +30,12 @@ class Sphere : public Hittable {
 private:
 	glm::vec3 center{};
 	float radius{};
-	std::unique_ptr<Material> material{}; // Maybe make shared_ptr since there may be a lot of hittables using the same material...
+	std::shared_ptr<Material> material{};
 public:
 	~Sphere() = default;
 	explicit Sphere(const glm::vec3& center, float radius) : center(center), radius(std::max(0.0f, radius)) {};
 	std::optional<HitRecord> hit(const Ray& ray, float rayTMin, float rayTMax) const;
 	HitRecord constructHitRecord(const Ray& ray, float t) const;
-	void setMaterial(std::unique_ptr<Material> mat);
+	void setMaterial(std::shared_ptr<Material> mat);
+	std::shared_ptr<Material> getMaterial() const;
 };

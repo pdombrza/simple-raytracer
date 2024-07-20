@@ -14,3 +14,5 @@ target_include_directories(Renderer PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../camer
 target_include_directories(Renderer PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../tobmp")
 target_include_directories(Renderer PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../color")
 target_include_directories(Renderer PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../utils")
+target_include_directories(Renderer PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../material")
+target_include_directories(Renderer PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../scattering_record")

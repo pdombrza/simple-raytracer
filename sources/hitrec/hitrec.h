@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include "ray.h"
+#include "utils.h"
 
 
 struct HitRecord {

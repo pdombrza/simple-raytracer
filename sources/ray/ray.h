@@ -1,6 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
 
+#include "utils.h"
+
 
 class Ray {
 private:
