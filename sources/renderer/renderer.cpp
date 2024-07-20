@@ -5,6 +5,7 @@ glm::vec3 BMPRenderer::calcRayColor(const Ray& ray, int depth) {
 		return glm::vec3(0.0f, 0.0f, 0.0f); // if exceeds maxdepth do not generate more light
 	std::optional<HitRecord> rec = scene.hit(ray, 0.001f, INF);
 	if (rec.has_value()) {
+		// We need to get material from Hittable that we're hitting
 		HitRecord hitrec = rec.value();
 		glm::vec3 direction = hitrec.normal + glm::normalize(Utils::random::randomVec3Norm());
 		return 0.5f * calcRayColor(Ray(hitrec.p, direction), depth - 1);

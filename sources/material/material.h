@@ -11,7 +11,7 @@
 class Material {
 public:
 	virtual ~Material() = default;
-	virtual std::optional<ScatteringRecord> scatter(const Ray& ray_in, const HitRecord& hitrec) const = 0;
+	virtual std::optional<ScatteringRecord> scatter(const Ray& rayIn, const HitRecord& hitrec) const = 0;
 };
 
 
@@ -21,4 +21,13 @@ private:
 public:
 	explicit Lambertian(const glm::vec3& albedo) : albedo(albedo) {};
 	std::optional<ScatteringRecord> scatter(const Ray& ray_in, const HitRecord& hitrec) const override;
+};
+
+
+class Metal : public Material {
+private:
+	glm::vec3 albedo;
+public:
+	explicit Metal(const glm::vec3& albedo) : albedo(albedo) {};
+	std::optional<ScatteringRecord> scatter(const Ray& rayIn, const HitRecord& hitrec) const override;
 };
