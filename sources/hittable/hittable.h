@@ -4,6 +4,7 @@
 #include <optional>
 #include <cmath>
 #include <memory>
+#include <utility>
 #include <glm/glm.hpp>
 #include "ray.h"
 #include "hitrec.h"
@@ -23,19 +24,21 @@ public:
 	virtual ~Hittable() = default;
 	virtual std::optional<HitRecord> hit(const Ray& ray, float rayTMin, float rayTMax) const = 0;
 	virtual HitRecord constructHitRecord(const Ray& ray, float t) const = 0;
+	virtual std::shared_ptr<Material> getMaterial() const = 0;
+	virtual void setMaterial(std::shared_ptr<Material> mat) = 0;
 };
 
 
 class Sphere : public Hittable {
-private:
+protected:
+	std::shared_ptr<Material> material{};
 	glm::vec3 center{};
 	float radius{};
-	std::shared_ptr<Material> material{};
 public:
 	~Sphere() = default;
-	explicit Sphere(const glm::vec3& center, float radius) : center(center), radius(std::max(0.0f, radius)) {};
-	std::optional<HitRecord> hit(const Ray& ray, float rayTMin, float rayTMax) const;
-	HitRecord constructHitRecord(const Ray& ray, float t) const;
-	void setMaterial(std::shared_ptr<Material> mat);
-	std::shared_ptr<Material> getMaterial() const;
+	explicit Sphere(const glm::vec3& center, float radius, std::shared_ptr<Material> mat) : Hittable(), center(center), radius(std::max(0.0f, radius)), material(mat) {};
+	virtual std::optional<HitRecord> hit(const Ray& ray, float rayTMin, float rayTMax) const override;
+	virtual HitRecord constructHitRecord(const Ray& ray, float t) const override;
+	virtual void setMaterial(std::shared_ptr<Material> mat) override;
+	virtual std::shared_ptr<Material> getMaterial() const override;
 };

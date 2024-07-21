@@ -3,10 +3,13 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <random>
+#include <utility>
+#include <optional>
 
 #include <glm/glm.hpp>
 
 #define INF std::numeric_limits<float>::max()
+
 
 namespace Utils::random {
 	template<typename T>

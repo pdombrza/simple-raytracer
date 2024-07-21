@@ -3,12 +3,15 @@
 glm::vec3 BMPRenderer::calcRayColor(const Ray& ray, int depth) {
 	if (depth < 0)
 		return glm::vec3(0.0f, 0.0f, 0.0f); // if exceeds maxdepth do not generate more light
-	std::optional<HitRecord> rec = scene.hit(ray, 0.001f, INF);
-	if (rec.has_value()) {
-		// We need to get material from Hittable that we're hitting
-		HitRecord hitrec = rec.value();
-		glm::vec3 direction = hitrec.normal + glm::normalize(Utils::random::randomVec3Norm());
-		return 0.5f * calcRayColor(Ray(hitrec.p, direction), depth - 1);
+	HitScatterRecord HSRec = scene.hit(ray, 0.001f, INF);
+	if (HSRec.hitRec.has_value()) {
+		// return a separate struct which will return HitRecord and ScatteringRecord (now hittableobjectlist.hit returns HitRecord without material info)
+		HitRecord hitrec = HSRec.hitRec.value();
+		if (HSRec.scatterRec.has_value()) {
+			ScatteringRecord scRec = HSRec.scatterRec.value();
+			return scRec.attenuation * calcRayColor(scRec.ray, depth - 1);
+		}
+		return glm::vec3(0.0f, 0.0f, 0.0f); // return color(0,0,0)
 	}
 
 	// gradient 

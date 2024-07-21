@@ -15,7 +15,7 @@
 
 
 class IRenderer {
-private:
+protected:
 	virtual glm::vec3 calcRayColor(const Ray& ray, int depth) = 0;
 public:
 	virtual ~IRenderer() = default;
@@ -26,9 +26,9 @@ public:
 
 
 class BMPRenderer : public IRenderer {
-private:
+protected:
+	virtual glm::vec3 calcRayColor(const Ray& ray, int depth) override;
 	HittableList scene;
-	glm::vec3 calcRayColor(const Ray& ray, int depth);
 	int imgWidth = 400;
 	int samplesPerPixel = 32;
 	int maxDepth = 10;
@@ -38,10 +38,10 @@ public:
 	BMPRenderer(HittableList& scene) : scene(scene) {};
 	BMPRenderer(HittableList& scene, int imgWidth, int samplesPerPixel, int maxDepth) : scene(scene), imgWidth(imgWidth), samplesPerPixel(samplesPerPixel), maxDepth(maxDepth) {};
 	~BMPRenderer() = default;
-	int render(Camera& camera); 
-	void setScene(HittableList& newScene) { scene = newScene; };
-	HittableList getScene() const { return scene; };
-	void setImgWidth(float newImgWidth) { imgWidth = newImgWidth; };
-	float getImgWidth() const { return imgWidth; };
-	float getImgHeight() const { return imgHeight; };
+	int render(Camera& camera) override; 
+	virtual void setScene(HittableList& newScene) override { scene = newScene; };
+	virtual HittableList getScene() const override { return scene; } ;
+	virtual void setImgWidth(float newImgWidth) { imgWidth = newImgWidth; };
+	virtual float getImgWidth() const { return imgWidth; };
+	virtual float getImgHeight() const { return imgHeight; };
 };
