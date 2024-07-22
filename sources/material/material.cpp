@@ -24,3 +24,13 @@ std::optional<ScatteringRecord> Metal::scatter(const Ray& rayIn, const HitRecord
 	}
 	return {};
 }
+
+
+std::optional<ScatteringRecord> Dielectric::scatter(const Ray& rayIn, const HitRecord& rec) const {
+	glm::vec3 attenuation{ 1.0f, 1.0f, 1.0f };
+	float reflectionRatio = rec.frontFace ? (1.0f / refractionIndex) : refractionIndex;
+	glm::vec3 dir = rayIn.getDirection(); // already unit vector
+	glm::vec3 refracted = glm::refract(dir, rec.normal, reflectionRatio);
+	Ray scattered = Ray(rec.p, refracted);
+	return ScatteringRecord{ scattered, attenuation };
+}

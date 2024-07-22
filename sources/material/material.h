@@ -33,3 +33,12 @@ public:
 	explicit Metal(const glm::vec3& albedo, float fuzziness) : albedo(albedo), fuzziness(std::min(1.0f, fuzziness)) {};
 	std::optional<ScatteringRecord> scatter(const Ray& rayIn, const HitRecord& hitrec) const override;
 };
+
+
+class Dielectric : public Material {
+private:
+	float refractionIndex{};
+public:
+	explicit Dielectric(float refractionIndex) : refractionIndex(refractionIndex) {};
+	std::optional<ScatteringRecord> scatter(const Ray& rayIn, const HitRecord& hitrec) const override;
+};
