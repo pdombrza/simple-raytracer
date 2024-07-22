@@ -37,9 +37,10 @@ std::optional<ScatteringRecord> Dielectric::scatter(const Ray& rayIn, const HitR
 	bool cannotRefract = reflectionRatio * sinTheta > 1.0f;
 
 	glm::vec3 scatteredDirection{};
-
-	if (cannotRefract || reflectance(cosTheta, reflectionRatio))
+	
+	if (cannotRefract || reflectance(cosTheta, reflectionRatio) > Utils::random::getRandomNorm()) {
 		scatteredDirection = glm::reflect(dir, rec.normal);
+	}
 	else
 		scatteredDirection = glm::refract(dir, rec.normal, reflectionRatio);
 
@@ -48,7 +49,7 @@ std::optional<ScatteringRecord> Dielectric::scatter(const Ray& rayIn, const HitR
 }
 
 
-float Dielectric::reflectance(const float cosine, const float refractionIndex) const {
+float Dielectric::reflectance(const float cosine, const float refractionIndex) {
 	// Schlick's approximation for reflectance
 	float r0 = (1.0f - refractionIndex) / (1.0f + refractionIndex);
 	r0 = r0 * r0;
