@@ -13,8 +13,8 @@ int main() {
 	HittableList scene{};
 	std::shared_ptr<Lambertian> materialGround = std::make_shared<Lambertian>(glm::vec3(0.8f, 0.8f, 0.0f));
 	std::shared_ptr<Lambertian> materialCenter = std::make_shared<Lambertian>(glm::vec3(0.1f, 0.2f, 0.5f));
-	std::shared_ptr<Metal> materialLeft = std::make_shared<Metal>(glm::vec3(0.8f, 0.8f, 0.8f));
-	std::shared_ptr<Metal> materialRight = std::make_shared<Metal>(glm::vec3(0.8f, 0.6f, 0.2f));
+	std::shared_ptr<Metal> materialLeft = std::make_shared<Metal>(glm::vec3(0.8f, 0.8f, 0.8f), 0.3f);
+	std::shared_ptr<Metal> materialRight = std::make_shared<Metal>(glm::vec3(0.8f, 0.6f, 0.2f), 1.0f);
 
 	scene.add(std::make_shared<Sphere>(glm::vec3(0.0f, -100.5f, -1.0f), 100.0f, materialGround));
 	scene.add(std::make_shared<Sphere>(glm::vec3(0.0f, 0.0f, -1.2f), 0.5f, materialCenter));

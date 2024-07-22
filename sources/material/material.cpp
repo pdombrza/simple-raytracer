@@ -14,10 +14,13 @@ std::optional<ScatteringRecord> Lambertian::scatter(const Ray& rayIn, const HitR
 
 
 std::optional<ScatteringRecord> Metal::scatter(const Ray& rayIn, const HitRecord& rec) const {
-	glm::vec3 reflected = glm::reflect(rayIn.getDirection(), rec.normal);
+	glm::vec3 reflected = glm::reflect(rayIn.getDirection(), rec.normal) + fuzziness * Utils::random::randomVec3Norm();
 	Ray scattered = Ray(rec.p, reflected);
-	ScatteringRecord sRec{};
-	sRec.ray = scattered;
-	sRec.attenuation = albedo;
-	return sRec;
+	if (glm::dot(reflected, rec.normal) > 0) {
+		ScatteringRecord sRec{};
+		sRec.ray = scattered;
+		sRec.attenuation = albedo;
+		return sRec;
+	}
+	return {};
 }
