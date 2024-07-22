@@ -28,21 +28,29 @@ std::optional<ScatteringRecord> Metal::scatter(const Ray& rayIn, const HitRecord
 
 std::optional<ScatteringRecord> Dielectric::scatter(const Ray& rayIn, const HitRecord& rec) const {
 	glm::vec3 attenuation{ 1.0f, 1.0f, 1.0f };
-	float reflectionRatio = rec.frontFace ? (1.0f / refractionIndex) : refractionIndex;
+	const float reflectionRatio = rec.frontFace ? (1.0f / refractionIndex) : refractionIndex;
 
 	glm::vec3 dir = rayIn.getDirection(); // already unit vector
-	float cosTheta = std::min(glm::dot(-dir, rec.normal), 1.0f);
+	const float cosTheta = std::min(glm::dot(-dir, rec.normal), 1.0f);
 	float sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
 
 	bool cannotRefract = reflectionRatio * sinTheta > 1.0f;
 
 	glm::vec3 scatteredDirection{};
 
-	if (cannotRefract)
+	if (cannotRefract || reflectance(cosTheta, reflectionRatio))
 		scatteredDirection = glm::reflect(dir, rec.normal);
 	else
 		scatteredDirection = glm::refract(dir, rec.normal, reflectionRatio);
 
 	Ray scattered = Ray(rec.p, scatteredDirection);
 	return ScatteringRecord{ scattered, attenuation };
+}
+
+
+float Dielectric::reflectance(const float cosine, const float refractionIndex) const {
+	// Schlick's approximation for reflectance
+	float r0 = (1.0f - refractionIndex) / (1.0f + refractionIndex);
+	r0 = r0 * r0;
+	return r0 + (1.0f - r0) * std::pow((1.0f - cosine), 5);
 }
