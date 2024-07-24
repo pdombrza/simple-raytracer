@@ -38,7 +38,7 @@ public:
 class Dielectric : public Material {
 private:
 	float refractionIndex{};
-	static float reflectance(const float cosine, const float refractionIndex);
+	static float reflectance(const float cosine, const float refractionIndex); // somehow produces wrong result when non-static
 public:
 	explicit Dielectric(float refractionIndex) : refractionIndex(refractionIndex) {};
 	std::optional<ScatteringRecord> scatter(const Ray& rayIn, const HitRecord& hitrec) const override;

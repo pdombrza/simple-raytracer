@@ -1,15 +1,25 @@
 #include "camera.h"
 
 void Camera::initialize(int imgWidth, int imgHeight) {
+	center = orientation.lookFrom;
+	float focalLength = (orientation.lookFrom - orientation.lookAt).length();
+	float theta = glm::radians(vFov);
+	float h = std::tan(theta / 2);
+	float viewportHeight = 2 * h * focalLength;
 	float viewportWidth = viewportHeight * ((float)imgWidth / imgHeight);
 
-	glm::vec3 viewportU(viewportWidth, 0.0f, 0.0f);
-	glm::vec3 viewportV(0.0f, -viewportHeight, 0.0f);
+	w = glm::normalize(orientation.lookFrom - orientation.lookAt);
+	u = glm::normalize(glm::cross(orientation.vUp, w));
+	v = glm::cross(w, u);
+
+
+	glm::vec3 viewportU = viewportWidth * u;
+	glm::vec3 viewportV = viewportHeight * (-v);
 
 	pixelDeltaU = viewportU / (float)imgWidth;
 	pixelDeltaV = viewportV / (float)imgHeight;
 
-	glm::vec3 viewportUpperLeft = center - glm::vec3(0.0f, 0.0f, focalLength) - viewportU / 2.0f - viewportV / 2.0f;
+	glm::vec3 viewportUpperLeft = center - (focalLength * w) - viewportU / 2.0f - viewportV / 2.0f;
 	startPixelLoc = viewportUpperLeft + 0.5f * (pixelDeltaU + pixelDeltaV);
 }
 
