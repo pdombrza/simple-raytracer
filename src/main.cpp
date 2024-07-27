@@ -27,9 +27,11 @@ int main() {
 	//scene.sortByDepth(); 
 
 	Camera cam{};
-	cam.setVFov(90.0f);
-	//CameraOrientation orientation{ glm::vec3(-2.0f, 2.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f) };
-	//cam.setCameraOrientation(orientation);
+	cam.setVFov(20.0f);
+	CameraOrientation orientation{ glm::vec3(-2.0f, 2.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f) };
+	cam.setCameraOrientation(orientation);
+	cam.setDefocusAngle(10.0f);
+	cam.setFocusDist(3.4f);
 	int imgWidth = 400;
 	int samplesPerPixel = 100;
 	int maxDepth = 50;

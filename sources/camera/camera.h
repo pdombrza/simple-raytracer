@@ -19,11 +19,15 @@ class Camera {
 private:
 	float aspectRatio = 16.0f / 9.0f;
 	float vFov = 90.0f; // in degrees
+	float defocusAngle = 0.0f; // Angle of the cone from pov to defocus disk
+	float focusDist = 10.0f; // The new focal length
 	glm::vec3 center{};
 	glm::vec3 startPixelLoc{};
 	glm::vec3 pixelDeltaU{};
 	glm::vec3 pixelDeltaV{};
 	glm::vec3 u{}, v{}, w{};
+	glm::vec3 defocusDiskU{};
+	glm::vec3 defocusDiskV{};
 	CameraOrientation orientation{};
 public:
 	Camera() {};
@@ -35,6 +39,7 @@ public:
 	Camera(float aspectRatio, float focalLength, float viewportHeight, const glm::vec3& center) : aspectRatio(aspectRatio), center(center) {};
 	~Camera() = default;
 	void initialize(int imgWidth, int imgHeight);
+	glm::vec3 defocusDiskSample() const;
 	Ray getRay(float h, float w) const;
 	void setAspectRatio(float newAspectRatio) { aspectRatio = newAspectRatio; };
 	float getAspectRatio() const { return aspectRatio; };
@@ -47,4 +52,8 @@ public:
 	glm::vec3 getStartPixelLoc() const { return startPixelLoc; };
 	glm::vec3 getPixelDeltaU() const { return pixelDeltaU; };
 	glm::vec3 getPixelDeltaV() const { return pixelDeltaV; };
+	float getDefocusAngle() const { return defocusAngle; };
+	void setDefocusAngle(float newDefocusAngle) { defocusAngle = newDefocusAngle; };
+	float getFocusDist() const { return focusDist; };
+	void setFocusDist(float newFocusDist) { focusDist = newFocusDist; };
 };

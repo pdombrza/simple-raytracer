@@ -41,7 +41,7 @@ namespace Utils::random {
 	inline glm::vec3 randomVec3InSphere() {
 		while (true) {
 			glm::vec3 randomVec = (randomVec3Norm() - 0.5f) * 2.0f;
-			if (std::pow(glm::length(randomVec), 2) < 1)
+			if (std::pow(glm::length(randomVec), 2) < 1.0f)
 				return glm::normalize(randomVec);
 		}
 	}
@@ -50,5 +50,13 @@ namespace Utils::random {
 		glm::vec3 onUnitSphere = randomVec3InSphere();
 		onUnitSphere = (glm::dot(onUnitSphere, normal) > 0.0f) ? onUnitSphere : -onUnitSphere;
 		return onUnitSphere;
+	}
+
+	inline glm::vec3 randomVec3InDisk() {
+		while (true) {
+			glm::vec3 randomVec{ getRandom(-1.0f, 1.0f), getRandom(-1.0f, 1.0f), 0.0f };
+			if (std::pow(glm::length(randomVec), 2) < 1.0f)
+				return randomVec;
+		}
 	}
 }
