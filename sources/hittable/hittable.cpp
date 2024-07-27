@@ -39,3 +39,7 @@ void Sphere::setMaterial(std::shared_ptr<Material> mat) {
 std::shared_ptr<Material> Sphere::getMaterial() const {
 	return material;
 }
+
+glm::vec3 Sphere::getCenter() const {
+	return center;
+}

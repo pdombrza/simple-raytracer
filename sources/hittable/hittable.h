@@ -20,12 +20,15 @@ int sign(T val) {
 
 
 class Hittable {
+protected:
+	glm::vec3 center{};
 public:
 	virtual ~Hittable() = default;
 	virtual std::optional<HitRecord> hit(const Ray& ray, float rayTMin, float rayTMax) const = 0;
 	virtual HitRecord constructHitRecord(const Ray& ray, float t) const = 0;
 	virtual std::shared_ptr<Material> getMaterial() const = 0;
 	virtual void setMaterial(std::shared_ptr<Material> mat) = 0;
+	virtual glm::vec3 getCenter() const = 0;
 };
 
 
@@ -41,4 +44,5 @@ public:
 	virtual HitRecord constructHitRecord(const Ray& ray, float t) const override;
 	virtual void setMaterial(std::shared_ptr<Material> mat) override;
 	virtual std::shared_ptr<Material> getMaterial() const override;
+	virtual glm::vec3 getCenter() const override;
 };

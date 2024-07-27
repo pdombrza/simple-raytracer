@@ -4,6 +4,7 @@
 #include <optional>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 
 #include "ray.h"
 #include "hitrec.h"

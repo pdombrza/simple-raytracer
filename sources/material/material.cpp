@@ -2,7 +2,7 @@
 
 
 std::optional<ScatteringRecord> Lambertian::scatter(const Ray& rayIn, const HitRecord& rec) const {
-	glm::vec3 scatterDirection = rec.normal + Utils::random::randomVec3Norm();
+	glm::vec3 scatterDirection = rec.normal + Utils::random::randomVec3InSphere();
 
 	// Catch degenerate scatter direction
 	if (glm::all(glm::epsilonEqual(scatterDirection, glm::vec3(0.0f, 0.0f, 0.0f), std::numeric_limits<float>::epsilon())))
@@ -14,7 +14,7 @@ std::optional<ScatteringRecord> Lambertian::scatter(const Ray& rayIn, const HitR
 
 
 std::optional<ScatteringRecord> Metal::scatter(const Ray& rayIn, const HitRecord& rec) const {
-	glm::vec3 reflected = glm::reflect(rayIn.getDirection(), rec.normal) + fuzziness * Utils::random::randomVec3Norm();
+	glm::vec3 reflected = glm::reflect(rayIn.getDirection(), rec.normal) + fuzziness * Utils::random::randomVec3InSphere();
 	Ray scattered = Ray(rec.p, reflected);
 	if (glm::dot(reflected, rec.normal) > 0) {
 		ScatteringRecord sRec{};
@@ -28,23 +28,20 @@ std::optional<ScatteringRecord> Metal::scatter(const Ray& rayIn, const HitRecord
 
 std::optional<ScatteringRecord> Dielectric::scatter(const Ray& rayIn, const HitRecord& rec) const {
 	glm::vec3 attenuation{ 1.0f, 1.0f, 1.0f };
-	const float reflectionRatio = rec.frontFace ? (1.0f / refractionIndex) : refractionIndex;
+	const float refractionRatio = rec.frontFace ? (1.0f / refractionIndex) : refractionIndex;
 
 	glm::vec3 dir = rayIn.getDirection(); // already unit vector
-	const float cosTheta = std::min(glm::dot(-dir, rec.normal), 1.0f);
-	float sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
+	const float cosTheta = std::min(glm::dot(-1.0f * dir, rec.normal), 1.0f);
+	const float sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
+	bool cannotRefract = refractionRatio * sinTheta > 1.0f;
+	glm::vec3 scatterDirection{};
 
-	bool cannotRefract = reflectionRatio * sinTheta > 1.0f;
-
-	glm::vec3 scatteredDirection{};
-	
-	if (cannotRefract || reflectance(cosTheta, reflectionRatio) > Utils::random::getRandomNorm()) {
-		scatteredDirection = glm::reflect(dir, rec.normal);
-	}
+	if (cannotRefract || reflectance(cosTheta, refractionRatio) > Utils::random::getRandomNorm())
+		scatterDirection = glm::reflect(dir, rec.normal);
 	else
-		scatteredDirection = glm::refract(dir, rec.normal, reflectionRatio);
+		scatterDirection = glm::refract(dir, rec.normal, refractionRatio);
 
-	Ray scattered = Ray(rec.p, scatteredDirection);
+	Ray scattered = Ray(rec.p, scatterDirection);
 	return ScatteringRecord{ scattered, attenuation };
 }
 

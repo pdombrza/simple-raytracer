@@ -39,7 +39,6 @@ int BMPRenderer::render(Camera& camera) {
 		}
 	}
 
-	std::string_view outPath = SOURCE_ROOT "/output.bmp";
 	int res = writeBMP(SOURCE_ROOT "/output.bmp", stream);
 
 	if (res < 0) {

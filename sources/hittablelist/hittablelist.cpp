@@ -11,25 +11,32 @@ void HittableList::add(std::shared_ptr<Hittable> hittable) {
 	objects.push_back(hittable);
 }
 
-HitScatterRecord HittableList::hit(const Ray & ray, float rayTMin, float rayTMax) const {
-	HitRecord rec{};
+HitScatterRecord HittableList::hit(const Ray& ray, float rayTMin, float rayTMax) const {
+	HitRecord closestHit;
 	HitScatterRecord HSRec{};
 	float closestDist = rayTMax;
-	HitRecord* closestRecord = nullptr;
+	bool hitAnything = false;
 	std::shared_ptr<Hittable> closestObj = nullptr;
 	
 	for (const auto& object : objects) {
 		std::optional<HitRecord> tempRec = object->hit(ray, rayTMin, rayTMax);
-		if (tempRec.has_value()) {
+		if (tempRec.has_value() && tempRec.value().t < closestDist) {
+			hitAnything = true;
 			closestObj = object;
 			closestDist = tempRec.value().t;
-			closestRecord = &tempRec.value();
+			closestHit = tempRec.value();
 		}
 	}
-	if (!closestRecord) return HSRec;
-	HSRec.hitRec = *closestRecord;
-	std::optional<ScatteringRecord> sRec = closestObj->getMaterial()->scatter(ray, *closestRecord);
+	if (!hitAnything) return HSRec;
+	HSRec.hitRec = closestHit;
+	std::optional<ScatteringRecord> sRec = closestObj->getMaterial()->scatter(ray, closestHit);
 	HSRec.scatterRec = sRec;
 
 	return HSRec;
+}
+
+void HittableList::sortByDepth() {
+	std::sort(objects.begin(), objects.end(), [](const std::shared_ptr<Hittable> a, const std::shared_ptr<Hittable> b) {
+		return a->getCenter().z > b->getCenter().z;
+		});
 }
