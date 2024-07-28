@@ -14,6 +14,9 @@ make -C build all
 ./build/raytracer
 ```
 
+### Dependencies
+This project uses glm for vector operations. The code for glm is directly in the repository (thirdparty directory).
+
 ### The future
 Stuff i may want to add in the future:
 * multithreading
