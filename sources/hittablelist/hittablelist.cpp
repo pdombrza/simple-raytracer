@@ -34,9 +34,3 @@ HitScatterRecord HittableList::hit(const Ray& ray, float rayTMin, float rayTMax)
 
 	return HSRec;
 }
-
-void HittableList::sortByDepth() {
-	std::sort(objects.begin(), objects.end(), [](const std::shared_ptr<Hittable> a, const std::shared_ptr<Hittable> b) {
-		return a->getCenter().z > b->getCenter().z;
-		});
-}

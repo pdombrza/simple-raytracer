@@ -19,5 +19,4 @@ public:
 	void clear();
 	void add(std::shared_ptr<Hittable> hittable);
 	HitScatterRecord hit(const Ray & ray, float rayTMin, float rayTMax) const;
-	void sortByDepth();
 };
