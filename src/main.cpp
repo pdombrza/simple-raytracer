@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <chrono>
 
 #include <glm/glm.hpp>
 
@@ -10,6 +11,13 @@
 #include <material.h>
 
 int main() {
+	
+	#ifdef NDEBUG
+		std::cout << "RELEASE" << std::endl;
+	#else
+		std::cout << "DEBUG" << std::endl;
+	#endif
+
 	HittableList scene{};
 	
 	auto materialGround = std::make_shared<Lambertian>(glm::vec3(0.5f, 0.5f, 0.5f));
@@ -63,11 +71,18 @@ int main() {
 	int samplesPerPixel = 256;
 	int maxDepth = 50;
 	BMPRenderer renderer(scene, imgWidth, samplesPerPixel, maxDepth);
-
+	
+	const auto startTime = std::chrono::steady_clock::now();
 	int result = renderer.render(cam);
+	const auto endTime = std::chrono::steady_clock::now();
+
 	if (result < 0) {
 		std::cerr << "It's over" << std::endl;
 		return -1;
 	}
+	const std::chrono::duration<double> renderTime = endTime - startTime;
+
+	std::cout << "Render time: " << renderTime << std::endl;
+
 	return 0;
 }
