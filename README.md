@@ -1,5 +1,5 @@
 ### Simple raytracer
-Based on the raytracing in a weekend [article](https://raytracing.github.io/books/RayTracingInOneWeekend.html).
+Based on the raytracing in a weekend [article](https://raytracing.github.io/books/RayTracingInOneWeekend.html). The program draws a simple scene to a BMP file.
 
 ### Purpose of the repository
 * I was interested in graphical programming, and though it would be a small and relatively simple introductory project.
@@ -7,11 +7,17 @@ Based on the raytracing in a weekend [article](https://raytracing.github.io/book
 
 ### Build the project
 * You can open the project in Visual Studio, then build and run with `ctrl+f5`
-* You can also build it with cmake:
+* You can also build it with cmake (in release or debug mode):
 ```
-cmake -B build
-make -C build all
-./build/raytracer
+cmake -S . -B out -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
+cmake --build out --config Release
+./out/raytracer
+```
+
+```
+cmake -S . -B out -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug
+cmake --build out --config Debug
+./out/raytracer
 ```
 
 ### Dependencies
@@ -19,10 +25,11 @@ This project uses glm for vector operations. The code for glm is directly in the
 
 ### The future
 Stuff i may want to add in the future:
-* multithreading
-* light sources
-* textures
-* objects different than spheres
+* multithreading - [x]
+* CUDA - [ ]
+* light sources - [ ]
+* textures - [ ]
+* objects different than spheres - [ ]
 
 ### The final render
 ![render so far](output.bmp)
