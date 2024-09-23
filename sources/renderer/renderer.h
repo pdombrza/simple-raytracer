@@ -4,7 +4,9 @@
 #include <optional>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 #include <fstream>
+#include <execution>
 
 #include "ray.h"
 #include "hitrec.h"
@@ -39,10 +41,20 @@ public:
 	BMPRenderer(HittableList& scene) : scene(scene) {};
 	BMPRenderer(HittableList& scene, int imgWidth, int samplesPerPixel, int maxDepth) : scene(scene), imgWidth(imgWidth), samplesPerPixel(samplesPerPixel), maxDepth(maxDepth) {};
 	~BMPRenderer() = default;
-	int render(Camera& camera) override; 
+	virtual int render(Camera& camera) override; 
 	virtual void setScene(HittableList& newScene) override { scene = newScene; };
 	virtual HittableList getScene() const override { return scene; } ;
 	virtual void setImgWidth(float newImgWidth) { imgWidth = newImgWidth; };
 	virtual float getImgWidth() const { return imgWidth; };
 	virtual float getImgHeight() const { return imgHeight; };
+};
+
+
+class MT_BMPRenderer : public BMPRenderer {
+private:
+	std::vector<int> widthVecIter, heightVecIter;
+	std::unique_ptr<glm::vec3[]> pxBuffer = nullptr;
+public:
+	using BMPRenderer::BMPRenderer;
+	virtual int render(Camera& camera) override;
 };

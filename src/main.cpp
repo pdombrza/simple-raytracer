@@ -68,9 +68,9 @@ int main() {
 	cam.setDefocusAngle(0.6f);
 	cam.setFocusDist(10.0f);
 	int imgWidth = 800;
-	int samplesPerPixel = 256;
-	int maxDepth = 50;
-	BMPRenderer renderer(scene, imgWidth, samplesPerPixel, maxDepth);
+	int samplesPerPixel = 50;
+	int maxDepth = 20;
+	MT_BMPRenderer renderer(scene, imgWidth, samplesPerPixel, maxDepth);
 	
 	const auto startTime = std::chrono::steady_clock::now();
 	int result = renderer.render(cam);

@@ -16,3 +16,13 @@ void writeColorToStream(std::stringstream& out, const glm::vec3& pixelColor) {
 
 	out << rTranslated << ' ' << gTranslated << ' ' << bTranslated << '\n';
 }
+
+std::stringstream writeBufferToStream(std::unique_ptr<glm::vec3[]> pxBuffer, int imgWidth, int imgHeight) {
+	std::stringstream out{};
+	out << "P3\n" << imgWidth << ' ' << imgHeight << "\n255\n";
+
+	for (size_t i = 0; i < imgHeight * imgWidth; i++) {
+		writeColorToStream(out, pxBuffer[i]);
+	}
+	return out;
+};
