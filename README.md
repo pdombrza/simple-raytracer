@@ -25,11 +25,11 @@ This project uses glm for vector operations. The code for glm is directly in the
 
 ### The future
 Stuff i may want to add in the future:
-* multithreading - [x]
-* CUDA - [ ]
-* light sources - [ ]
-* textures - [ ]
-* objects different than spheres - [ ]
+* multithreading - done
+* CUDA
+* light sources
+* textures
+* objects different than spheres
 
 ### The final render
 ![render so far](output.bmp)
