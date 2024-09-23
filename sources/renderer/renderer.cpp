@@ -56,8 +56,6 @@ int MT_BMPRenderer::render(Camera& camera) {
 	camera.initialize(imgWidth, imgHeight);
 
 	// We can get away with resizing in render function since it's called only once
-	//pxBuffer = new glm::vec3[imgWidth * imgHeight];
-	//memset(pxBuffer, 0, imgWidth * imgHeight * sizeof(glm::vec3));
 	pxBuffer = std::make_unique<glm::vec3[]>(imgWidth * imgHeight);
 	widthVecIter.resize(imgWidth); 
 	heightVecIter.resize(imgHeight); 
@@ -81,16 +79,6 @@ int MT_BMPRenderer::render(Camera& camera) {
 				});
 		});
 
-	//for (size_t i = 0; i < imgHeight; i++) {
-	//	for (size_t j = 0; j < imgWidth; j++) {
-	//		glm::vec3 pxColor(0.0f, 0.0f, 0.0f);
-	//		for (int sample = 0; sample < samplesPerPixel; sample++) {
-	//			Ray r = camera.getRay(j, i);
-	//			pxColor += calcRayColor(r, maxDepth);
-	//		}
-	//		pxBuffer[i * imgWidth + j] = pxColor * pixelSamplesScale;
-	//	}
-	//}
 
 	std::stringstream imgStream = writeBufferToStream(std::move(pxBuffer), imgWidth, imgHeight);
 
