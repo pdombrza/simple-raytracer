@@ -10,8 +10,11 @@
 #include <hittablelist.h>
 #include <material.h>
 #include <window.h>
+#include <windinput.h>
 
 bool Window::running;
+Input Window::input;
+
 
 int main() {
 
@@ -52,6 +55,16 @@ int main() {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg); // calls the callback to handle events (Window::windproc)
 		}
+
+		if (!Window::input.focused) {
+			Window::resetInput();
+		}
+
+		if (Window::input.keyboard[Button::Q].pressed || Window::input.keyboard[Button::Escape].pressed) {
+			Window::kill();
+		}
+
+		Window::processKeyboardAfter();
 	}
 
 
