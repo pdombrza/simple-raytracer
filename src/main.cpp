@@ -12,9 +12,6 @@
 #include <window.h>
 #include <windinput.h>
 
-bool Window::running;
-Input Window::input;
-
 
 int main() {
 
@@ -23,49 +20,6 @@ int main() {
 #else
 	std::cout << "DEBUG" << std::endl;
 #endif
-
-	Window::running = true;
-
-	WNDCLASS wc = {sizeof(WNDCLASS)};
-	wc.style = CS_HREDRAW | CS_VREDRAW;
-	wc.lpfnWndProc = Window::windProc;
-	wc.hInstance = GetModuleHandle(NULL); // handle to the calling process (so my program)
-	wc.hCursor = LoadCursor(0, IDC_ARROW);
-	wc.lpszClassName = "Dog Window Class";
-
-	if (!RegisterClass(&wc)) {
-		std::cerr << "Failed to register window class";
-		return 1;
-	}
-
-	HWND wind = CreateWindowExA(
-		0, // optional window style
-		wc.lpszClassName, // class name
-		"The window", // window title
-		WS_OVERLAPPEDWINDOW | WS_VISIBLE, // style (default)
-
-		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, // posx, posy, sizex, sizey
-		NULL, NULL, GetModuleHandle(NULL), NULL // parent, menu, handle, ptr to arbitrary data
-	);
-
-	while (Window::running) {
-		MSG msg = {};
-		while (PeekMessage(&msg, wind, NULL, NULL, PM_REMOVE) > 0) // process messages to window from queue
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg); // calls the callback to handle events (Window::windproc)
-		}
-
-		if (!Window::input.focused) {
-			Window::resetInput();
-		}
-
-		if (Window::input.keyboard[Button::Q].pressed || Window::input.keyboard[Button::Escape].pressed) {
-			Window::kill();
-		}
-
-		Window::processKeyboardAfter();
-	}
 
 
 	//HittableList scene{};
