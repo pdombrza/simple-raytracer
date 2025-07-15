@@ -21,6 +21,9 @@ int main() {
 	std::cout << "DEBUG" << std::endl;
 #endif
 
+	Window wind("RT");
+	wind.processInputLoop();
+
 
 	//HittableList scene{};
 	//
@@ -72,6 +75,7 @@ int main() {
 	//cam.setDefocusAngle(0.6f);
 	//cam.setFocusDist(10.0f);
 	//int imgWidth = 800;
+	//int imgHeight = std::max(1, (int)(imgWidth / camera.getAspectRatio()));
 	//int samplesPerPixel = 256;
 	//int maxDepth = 50;
 	//MT_BMPRenderer renderer(scene, imgWidth, samplesPerPixel, maxDepth);

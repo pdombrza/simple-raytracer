@@ -96,7 +96,7 @@ int MT_BMPRenderer::render(Camera& camera) {
 }
 
 void MT_WindowRenderer::pxBufToGDI(int imgWidth, int imgHeight) {
-	rgbBuffer = std::make_unique<uint8_t[]>(imgWidth * imgHeight * 4);
+	rgbBuffer = std::make_shared<uint8_t[]>(imgWidth * imgHeight * 4);
 	for (int y = 0; y < imgHeight; y++) {
 		for (int x = 0; x < imgWidth; x++) {
 			glm::vec3 color = pxBuffer[(imgHeight - 1 - y) * imgWidth + x];
@@ -105,7 +105,7 @@ void MT_WindowRenderer::pxBufToGDI(int imgWidth, int imgHeight) {
 			rgbBuffer[index + 0] = static_cast<uint8_t>(color.b * 255.0f);
 			rgbBuffer[index + 1] = static_cast<uint8_t>(color.g * 255.0f);
 			rgbBuffer[index + 2] = static_cast<uint8_t>(color.r * 255.0f);
-			rgbBuffer[index + 3] = 255; // alpha channel
+			rgbBuffer[index + 3] = 0; // alpha channel
 		}
 	}
 }

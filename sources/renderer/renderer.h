@@ -66,9 +66,10 @@ class MT_WindowRenderer : public MT_BMPRenderer {
 private:
 	std::vector<int> widthVecIter, heightVecIter;
 protected:
-	std::unique_ptr<uint8_t[]> rgbBuffer = nullptr;
+	std::shared_ptr<uint8_t[]> rgbBuffer = nullptr;
 	virtual void pxBufToGDI(int imgWidth, int imgHeight);
 public:
 	using MT_BMPRenderer::MT_BMPRenderer;
 	virtual int render(Camera& camera) override;
+	std::shared_ptr<uint8_t[]> getRgbBuffer() { return rgbBuffer; };
 };

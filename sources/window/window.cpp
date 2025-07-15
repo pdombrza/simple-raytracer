@@ -1,6 +1,6 @@
 #include "window.h"
 
-Window::Window(std::string windowTitle) {
+Window::Window(std::string windowTitle, int width, int height) {
 	registerClass();
 	wind = CreateWindowExA(
 		0, // optional window style
@@ -11,6 +11,7 @@ Window::Window(std::string windowTitle) {
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, // posx, posy, sizex, sizey
 		NULL, NULL, GetModuleHandle(NULL), this // parent, menu, handle, ptr to this
 	);
+	buf = WindowBuffer(width, height);
 }
 
 Window::~Window() {
@@ -83,8 +84,7 @@ LRESULT CALLBACK Window::windProcRedirect(HWND hwnd, UINT msg, WPARAM wParam, LP
 LRESULT CALLBACK Window::windProc(HWND windowHandle, UINT msg, WPARAM wp, LPARAM lp) {
 	LRESULT res = 0;
 	bool pressed = false;
-	switch (msg)
-	{
+	switch (msg) {
 	case WM_CLOSE:
 		running = false;
 		return res;
@@ -94,6 +94,25 @@ LRESULT CALLBACK Window::windProc(HWND windowHandle, UINT msg, WPARAM wp, LPARAM
 	case WM_KILLFOCUS:
 		input.focused = false;
 		return res;
+	case WM_PAINT: {
+		PAINTSTRUCT paint{};
+		HDC deviceContext{};
+		HDC hdc = GetDC(wind);
+
+		auto data = buf.getData();
+
+		StretchDIBits(hdc,
+			0, 0, buf.getWidth(), buf.getHeight(),
+			0, 0, buf.getWidth(), buf.getHeight(),
+			data.get(),
+			&buf.getBitmapInfo(),
+			DIB_RGB_COLORS,
+			SRCCOPY
+		);
+
+		ReleaseDC(wind, hdc);
+		EndPaint(wind, &paint);
+	} break;
 	case WM_SYSKEYDOWN:
 	case WM_KEYDOWN:
 		pressed = true;
@@ -113,8 +132,14 @@ LRESULT CALLBACK Window::windProc(HWND windowHandle, UINT msg, WPARAM wp, LPARAM
 	}
 }
 
+void Window::setWindowData(std::unique_ptr<uint8_t[]> data) {
+	buf.setData(std::move(data));
+	InvalidateRect(wind, NULL, TRUE);
+}
+	
+
 void Window::processInputLoop() {
-	while (Window::running) {
+	while (running) {
 		MSG msg = {};
 		while (PeekMessage(&msg, wind, NULL, NULL, PM_REMOVE) > 0) // process messages to window from queue
 		{
@@ -122,14 +147,23 @@ void Window::processInputLoop() {
 			DispatchMessage(&msg); // calls the callback to handle events (Window::windproc)
 		}
 
-		if (!Window::input.focused) {
-			Window::resetInput();
+		if (!input.focused) {
+			resetInput();
 		}
 
-		if (Window::input.keyboard[Button::Q].pressed || Window::input.keyboard[Button::Escape].pressed) {
-			Window::kill();
+		if (input.keyboard[Button::Q].pressed || input.keyboard[Button::Escape].pressed) {
+			kill();
 		}
 
-		Window::processKeyboardAfter();
+		processKeyboardAfter();
 	}
+}
+
+WindowBuffer::WindowBuffer() {
+	bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bmi.bmiHeader.biWidth = width;
+	bmi.bmiHeader.biHeight = -height; // negative for top-down
+	bmi.bmiHeader.biPlanes = 1;
+	bmi.bmiHeader.biBitCount = 32;
+	bmi.bmiHeader.biCompression = BI_RGB;
 }
