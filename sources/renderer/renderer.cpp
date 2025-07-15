@@ -99,13 +99,13 @@ void MT_WindowRenderer::pxBufToGDI(int imgWidth, int imgHeight) {
 	rgbBuffer = std::make_shared<uint8_t[]>(imgWidth * imgHeight * 4);
 	for (int y = 0; y < imgHeight; y++) {
 		for (int x = 0; x < imgWidth; x++) {
-			glm::vec3 color = pxBuffer[(imgHeight - 1 - y) * imgWidth + x];
+			glm::vec3 color = pxBuffer[y * imgWidth + x];
 			int index = (y * imgWidth + x) * 4;
 			color = glm::clamp(color, glm::vec3(0.0f), glm::vec3(1.0f));
 			rgbBuffer[index + 0] = static_cast<uint8_t>(color.b * 255.0f);
 			rgbBuffer[index + 1] = static_cast<uint8_t>(color.g * 255.0f);
 			rgbBuffer[index + 2] = static_cast<uint8_t>(color.r * 255.0f);
-			rgbBuffer[index + 3] = 0; // alpha channel
+			rgbBuffer[index + 3] = 255; // alpha channel
 		}
 	}
 }
@@ -114,5 +114,5 @@ int MT_WindowRenderer::render(Camera& camera) {
 	populatePxBuffer(camera);
 	imgHeight = std::max(1, (int)(imgWidth / camera.getAspectRatio()));
 	pxBufToGDI(imgWidth, imgHeight);
-	// TODO: THIS!
+	return 0;
 }

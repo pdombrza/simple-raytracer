@@ -57,6 +57,7 @@ protected:
 	std::unique_ptr<glm::vec3[]> pxBuffer = nullptr;
 public:
 	using BMPRenderer::BMPRenderer;
+	virtual void setPxBuffer(std::unique_ptr<glm::vec3[]> pxbuf) { pxBuffer = std::move(pxbuf); };
 	virtual void populatePxBuffer(Camera& camera);
 	virtual int render(Camera& camera) override;
 };
@@ -67,8 +68,8 @@ private:
 	std::vector<int> widthVecIter, heightVecIter;
 protected:
 	std::shared_ptr<uint8_t[]> rgbBuffer = nullptr;
-	virtual void pxBufToGDI(int imgWidth, int imgHeight);
 public:
+	virtual void pxBufToGDI(int imgWidth, int imgHeight);
 	using MT_BMPRenderer::MT_BMPRenderer;
 	virtual int render(Camera& camera) override;
 	std::shared_ptr<uint8_t[]> getRgbBuffer() { return rgbBuffer; };
