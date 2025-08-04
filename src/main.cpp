@@ -79,8 +79,7 @@ int main() {
 	
 	// render the scene
 	const auto startTime = std::chrono::steady_clock::now();
-	//int result = renderer.render(cam);
-	int result = 0;
+	int result = renderer.render(cam);
 	const auto endTime = std::chrono::steady_clock::now();
 
 	if (result < 0) {
@@ -91,19 +90,18 @@ int main() {
 
 	std::cout << "Render time: " << renderTime << std::endl;
 
-	std::unique_ptr<glm::vec3[]> pxBuffer = std::make_unique<glm::vec3[]>(imgWidth * imgHeight);
-	for (int y = 0; y < imgHeight; ++y) {
-		for (int x = 0; x < imgWidth; ++x) {
-			pxBuffer[y * imgWidth + x] = glm::vec3(1.0f, 0.0f, 0.0f); // Solid red
-		}
-	}
+	//std::unique_ptr<glm::vec3[]> pxBuffer = std::make_unique<glm::vec3[]>(imgWidth*imgHeight);
+	//for (int y = 0; y < imgHeight; ++y) {
+	//	for (int x = 0; x < imgWidth; ++x) {
+	//		pxBuffer[y * imgWidth + x] = glm::vec3(1.0f, 0.0f, 0.0f);
+	//	}
+	//}
+
 	//Set up the window
-	renderer.setPxBuffer(std::move(pxBuffer));
+	//renderer.setPxBuffer(std::move(pxBuffer));
 	std::cout << "Image height: " << imgHeight << "Image width: " << imgWidth << std::endl;
 	renderer.pxBufToGDI(imgWidth, imgHeight);
 	Window wind("RT", imgWidth, imgHeight);
-	//std::cout << "bufw: " << wind.buf.getWidth();
-	//std::cout << "bufh: " << wind.buf.getHeight();
 	wind.setWindowData(renderer.getRgbBuffer());
 	wind.show();
 	wind.processInputLoop();

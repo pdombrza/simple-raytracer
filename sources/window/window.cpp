@@ -128,7 +128,7 @@ LRESULT CALLBACK Window::windProc(HWND windowHandle, UINT msg, WPARAM wp, LPARAM
 		//std::cout << "WM_PAINT: Drawing buffer with size " << buf.getWidth() << "x" << buf.getHeight() << std::endl;
 		if (data) {
 			StretchDIBits(hdc,
-				0, 0, buf.getHeight(), buf.getHeight(),
+				0, 0, buf.getWidth(), buf.getHeight(),
 				0, 0, buf.getWidth(), buf.getHeight(),
 				data.get(),
 				&buf.getBitmapInfo(),
