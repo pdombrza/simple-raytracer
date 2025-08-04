@@ -2,7 +2,7 @@
 Based on the raytracing in a weekend [article](https://raytracing.github.io/books/RayTracingInOneWeekend.html). The program draws a simple scene to a BMP file.
 
 ### Purpose of the repository
-* I was interested in graphical programming, and though it would be a small and relatively simple introductory project.
+* I was interested in graphics programming, and though it would be a small and relatively simple introductory project.
 * I also wanted to improve my knowledge of C++ - i tried to use some of the newer C++ features.
 
 ### Build the project
@@ -26,6 +26,7 @@ This project uses glm for vector operations. The code for glm is directly in the
 ### The future
 Stuff i may want to add in the future:
 * multithreading - done
+* Render to window instead of a bitmap file - done
 * CUDA
 * light sources
 * textures
@@ -33,3 +34,4 @@ Stuff i may want to add in the future:
 
 ### The final render
 ![render so far](output.bmp)
+
