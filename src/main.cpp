@@ -9,14 +9,18 @@
 #include <hittable.h>
 #include <hittablelist.h>
 #include <material.h>
+#include <window.h>
+#include <windinput.h>
+
 
 int main() {
-	
-	#ifdef NDEBUG
-		std::cout << "RELEASE" << std::endl;
-	#else
-		std::cout << "DEBUG" << std::endl;
-	#endif
+
+#ifdef NDEBUG
+	std::cout << "RELEASE" << std::endl;
+#else
+	std::cout << "DEBUG" << std::endl;
+#endif
+
 
 	HittableList scene{};
 	
@@ -60,7 +64,7 @@ int main() {
 	auto material3 = std::make_shared<Metal>(glm::vec3(0.7f, 0.6f, 0.5f), 0.0f);
 	scene.add(std::make_shared<Sphere>(glm::vec3(4.0f, 1.0f, 0.0f), 1.0f, material3));
 
-
+	// Set up the camera and the renderer
 	Camera cam{};
 	cam.setVFov(20.0f);
 	CameraOrientation orientation{ glm::vec3(13.0f, 2.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f) };
@@ -68,10 +72,12 @@ int main() {
 	cam.setDefocusAngle(0.6f);
 	cam.setFocusDist(10.0f);
 	int imgWidth = 800;
+	int imgHeight = std::max(1, (int)(imgWidth / cam.getAspectRatio()));
 	int samplesPerPixel = 256;
 	int maxDepth = 50;
-	MT_BMPRenderer renderer(scene, imgWidth, samplesPerPixel, maxDepth);
+	MT_WindowRenderer renderer(scene, imgWidth, samplesPerPixel, maxDepth);
 	
+	// render the scene
 	const auto startTime = std::chrono::steady_clock::now();
 	int result = renderer.render(cam);
 	const auto endTime = std::chrono::steady_clock::now();
@@ -83,6 +89,22 @@ int main() {
 	const std::chrono::duration<double> renderTime = endTime - startTime;
 
 	std::cout << "Render time: " << renderTime << std::endl;
+
+	//std::unique_ptr<glm::vec3[]> pxBuffer = std::make_unique<glm::vec3[]>(imgWidth*imgHeight);
+	//for (int y = 0; y < imgHeight; ++y) {
+	//	for (int x = 0; x < imgWidth; ++x) {
+	//		pxBuffer[y * imgWidth + x] = glm::vec3(1.0f, 0.0f, 0.0f);
+	//	}
+	//}
+
+	//Set up the window
+	//renderer.setPxBuffer(std::move(pxBuffer));
+	std::cout << "Image height: " << imgHeight << "Image width: " << imgWidth << std::endl;
+	renderer.pxBufToGDI(imgWidth, imgHeight);
+	Window wind("RT", imgWidth, imgHeight);
+	wind.setWindowData(renderer.getRgbBuffer());
+	wind.show();
+	wind.processInputLoop();
 
 	return 0;
 }
