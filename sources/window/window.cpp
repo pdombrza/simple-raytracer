@@ -117,15 +117,11 @@ LRESULT CALLBACK Window::windProc(HWND windowHandle, UINT msg, WPARAM wp, LPARAM
 	case WM_PAINT: {
 		PAINTSTRUCT paint;
 		HDC hdc = BeginPaint(wind, &paint);
-		//HDC hdc = GetDC(wind);
 		RECT clientRect;
 		GetClientRect(windowHandle, &clientRect);
 		int clientWidth = clientRect.right - clientRect.left;
 		int clientHeight = clientRect.bottom - clientRect.top;
-		//std::cout << "Client size: " << clientWidth << "x" << clientHeight << "\n";
-		//std::cout << "Buffer size: " << buf.getWidth() << "x" << buf.getHeight() << "\n";
 		auto data = buf.getData();
-		//std::cout << "WM_PAINT: Drawing buffer with size " << buf.getWidth() << "x" << buf.getHeight() << std::endl;
 		if (data) {
 			StretchDIBits(hdc,
 				0, 0, buf.getWidth(), buf.getHeight(),
