@@ -14,30 +14,30 @@ void checkCuda(cudaError_t result, char const* const func, const char* const fil
     }
 }
 
-__global__ void renderKernel(uint8_t* buffer, int width, int height) {
+__global__ void renderKernel(glm::vec3* buffer, int width, int height) {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (x >= width || y >= height) return;
 
-    int index = (y * width + x) * 4;
-    buffer[index + 0] = 0;
-    buffer[index + 1] = 0;
-    buffer[index + 2] = 255;
-    buffer[index + 3] = 255;
+    int index = y * width + x;
+    buffer[index] = glm::vec3(0.0f, 1.0f, 0.0f);
 }
 
-void launchRaytracer(uint8_t* output, int width, int height) {
-    uint8_t* buffer;
-    size_t size = width * height * 4;
+std::unique_ptr<glm::vec3[]> launchRaytracer(int width, int height) {
+    size_t size = width * height * sizeof(glm::vec3);
+
+    glm::vec3* buffer = nullptr;
     checkCudaErrors(cudaMalloc(&buffer, size));
-
     dim3 blockSize(16, 16);
-    dim3 gridSize((width + blockSize.x - 1) / blockSize.x,
-        (height + blockSize.y - 1) / blockSize.y);
-
-    renderKernel<<<gridSize, blockSize>>>(buffer, width, height);
+    dim3 gridSize((width + 15) / 16, (height + 15) / 16);
+    renderKernel<<<gridSize, blockSize>>> (buffer, width, height);
     checkCudaErrors(cudaDeviceSynchronize());
-    checkCudaErrors(cudaMemcpy(output, buffer, size, cudaMemcpyDeviceToHost));
+
+    std::unique_ptr<glm::vec3[]> pxBuffer = std::make_unique<glm::vec3[]>(width * height);
+
+    checkCudaErrors(cudaMemcpy(pxBuffer.get(), buffer, size, cudaMemcpyDeviceToHost));
     checkCudaErrors(cudaFree(buffer));
+
+    return pxBuffer;
 }

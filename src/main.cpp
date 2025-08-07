@@ -80,16 +80,11 @@ int main() {
 	const auto startTime = std::chrono::steady_clock::now();
 	//int result = renderer.render(cam);
 	int result = 0;
-	const auto endTime = std::chrono::steady_clock::now();
+	
+	auto pxBuffer = launchRaytracer(imgWidth, imgHeight);
 
-	std::vector<uint8_t> image(imgWidth * imgHeight * 4);
-	launchRaytracer(image.data(), imgWidth, imgHeight);
+	const auto endTime = std::chrono::steady_clock::now();
 	std::cout << "Image height: " << imgHeight << "Image width: " << imgWidth << std::endl;
-	std::cout << "Rendering complete. First pixel: "
-		<< (int)image[0] << ", "
-		<< (int)image[1] << ", "
-		<< (int)image[2] << ", "
-		<< (int)image[3] << "\n";
 
 	if (result < 0) {
 		std::cerr << "It's over" << std::endl;
@@ -99,15 +94,8 @@ int main() {
 
 	std::cout << "Render time: " << renderTime << std::endl;
 
-	//std::unique_ptr<glm::vec3[]> pxBuffer = std::make_unique<glm::vec3[]>(imgWidth*imgHeight);
-	//for (int y = 0; y < imgHeight; ++y) {
-	//	for (int x = 0; x < imgWidth; ++x) {
-	//		pxBuffer[y * imgWidth + x] = glm::vec3(1.0f, 0.0f, 0.0f);
-	//	}
-	//}
-
 	//Set up the window
-	//renderer.setPxBuffer(std::move(pxBuffer));
+	renderer.setPxBuffer(std::move(pxBuffer));
 	renderer.pxBufToGDI(imgWidth, imgHeight);
 	Window wind("RT", imgWidth, imgHeight);
 	wind.setWindowData(renderer.getRgbBuffer());
