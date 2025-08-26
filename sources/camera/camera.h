@@ -2,10 +2,10 @@
 
 #include <glm/glm.hpp>
 
-#include "hittable.h"
-#include "hitrec.h"
-#include "ray.h"
-#include "utils.h"
+#include "hittable/hittable.h"
+#include "hitrec/hitrec.h"
+#include "ray/ray.h"
+#include "utils/utils.h"
 
 
 struct CameraOrientation {

@@ -6,10 +6,10 @@
 #include <memory>
 #include <utility>
 #include <glm/glm.hpp>
-#include "ray.h"
-#include "hitrec.h"
-#include "utils.h"
-#include "material.h"
+#include "ray/ray.h"
+#include "hitrec/hitrec.h"
+#include "utils/utils.h"
+#include "material/material.h"
 
 
 template<typename T>

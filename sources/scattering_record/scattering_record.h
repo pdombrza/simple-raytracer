@@ -2,8 +2,8 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/epsilon.hpp>
-#include "ray.h"
-#include "utils.h"
+#include "ray/ray.h"
+#include "utils/utils.h"
 
 
 struct ScatteringRecord {

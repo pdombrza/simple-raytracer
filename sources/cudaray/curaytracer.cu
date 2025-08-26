@@ -1,5 +1,3 @@
-#include <device_launch_parameters.h>
-
 #include "cudaray.h"
 
 #define checkCudaErrors(val) checkCuda( (val), #val, __FILE__, __LINE__ )
@@ -31,7 +29,7 @@ std::unique_ptr<glm::vec3[]> launchRaytracer(int width, int height) {
     checkCudaErrors(cudaMalloc(&buffer, size));
     dim3 blockSize(16, 16);
     dim3 gridSize((width + 15) / 16, (height + 15) / 16);
-    renderKernel<<<gridSize, blockSize>>> (buffer, width, height);
+    renderKernel<<<gridSize, blockSize>>>(buffer, width, height);
     checkCudaErrors(cudaDeviceSynchronize());
 
     std::unique_ptr<glm::vec3[]> pxBuffer = std::make_unique<glm::vec3[]>(width * height);

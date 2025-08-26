@@ -3,10 +3,10 @@
 #include <optional>
 #include <algorithm>
 #include <glm/glm.hpp>
-#include "hitrec.h"
-#include "ray.h"
-#include "utils.h"
-#include "scattering_record.h"
+#include "hitrec/hitrec.h"
+#include "ray/ray.h"
+#include "utils/utils.h"
+#include "scattering_record/scattering_record.h"
 
 
 class Material {

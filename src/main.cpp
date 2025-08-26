@@ -4,14 +4,14 @@
 
 #include <glm/glm.hpp>
 
-#include <camera.h>
-#include <renderer.h>
-#include <hittable.h>
-#include <hittablelist.h>
-#include <material.h>
-#include <cudaray.h>
-#include <window.h>
-#include <windinput.h>
+#include "camera/camera.h"
+#include "renderer/renderer.h"
+#include "hittable/hittable.h"
+#include "hittablelist/hittablelist.h"
+#include "material/material.h"
+#include "cudaray/cudaray.h"
+#include "window/window.h"
+#include "window/windinput.h"
 
 int main() {
 

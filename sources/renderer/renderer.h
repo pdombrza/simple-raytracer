@@ -8,13 +8,13 @@
 #include <fstream>
 #include <execution>
 
-#include "ray.h"
-#include "hitrec.h"
-#include "hittablelist.h"
-#include "material.h"
-#include "camera.h"
-#include "tobmp.h"
-#include "color.h"
+#include "ray/ray.h"
+#include "hitrec/hitrec.h"
+#include "hittablelist/hittablelist.h"
+#include "material/material.h"
+#include "camera/camera.h"
+#include "tobmp/tobmp.h"
+#include "color/color.h"
 
 
 class IRenderer {

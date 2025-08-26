@@ -1,7 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
 
-#include "utils.h"
+#include "utils/utils.h"
+#include "cuvec/cuvec.h"
 
 
 class Ray {

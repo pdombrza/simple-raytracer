@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
-
-#include "cudaray.h"
+#include <iostream>
+#include <cuda_runtime.h>
 
 
 namespace cu {
@@ -33,20 +33,20 @@ namespace cu {
 		__host__ __device__ float length() const;
 		__host__ __device__ float length_squared() const;
 
-		__host__ __device__ void make_unit_vector();
 	};
+	__host__ __device__ vec3 operator+(const vec3& v1, const vec3& v2);
+	__host__ __device__ vec3 operator-(const vec3& v1, const vec3& v2);
+	__host__ __device__ vec3 operator*(const vec3& v1, const vec3& v2);
+	__host__ __device__ vec3 operator/(const vec3& v1, const vec3& v2);
+
+	__host__ __device__ vec3 operator*(float t, const vec3& v);
+	__host__ __device__ vec3 operator/(const vec3& v, float t);
+
+	__host__ __device__ float dot(const vec3& v1, const vec3& v2);
+	__host__ __device__ vec3 cross(const vec3& v1, const vec3& v2);
+	__host__ __device__ vec3 normalize(const vec3& v);
 }
-
-__host__ __device__ cu::vec3 operator+(const cu::vec3& v1, const cu::vec3& v2);
-__host__ __device__ cu::vec3 operator-(const cu::vec3& v1, const cu::vec3& v2);
-__host__ __device__ cu::vec3 operator*(const cu::vec3& v1, const cu::vec3& v2);
-__host__ __device__ cu::vec3 operator/(const cu::vec3& v1, const cu::vec3& v2);
-
-__host__ __device__ cu::vec3 operator*(float t, const cu::vec3& v);
-__host__ __device__ cu::vec3 operator/(const cu::vec3& v, float t);
-
-__host__ __device__ float dot(const cu::vec3& v1, const cu::vec3& v2);
-__host__ __device__ cu::vec3 cross(const cu::vec3& v1, const cu::vec3& v2);
 
 inline std::istream& operator>>(std::istream& is, cu::vec3& t);
 inline std::ostream& operator<<(std::ostream& os, const cu::vec3& t);
+

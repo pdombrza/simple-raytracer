@@ -59,6 +59,6 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${CUDAToolkit_INCLUDE_DIRS})
 
 
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Color Tobmp Ray HitRecord Hittable HittableList Camera Renderer Utils Material ScatteringRecord Window Cudaray Cuvec)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Cudaray Cuvec Color Tobmp Ray HitRecord Hittable HittableList Camera Renderer Utils Material ScatteringRecord Window)
 
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm)

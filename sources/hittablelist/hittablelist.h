@@ -4,11 +4,11 @@
 #include <memory>
 #include <optional>
 
-#include "hittable.h"
-#include "material.h"
-#include "utils.h"
-#include "hitrec.h"
-#include "ray.h"
+#include "hittable/hittable.h"
+#include "material/material.h"
+#include "utils/utils.h"
+#include "hitrec/hitrec.h"
+#include "ray/ray.h"
 
 
 class HittableList {

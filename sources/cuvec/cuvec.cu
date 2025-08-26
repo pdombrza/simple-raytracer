@@ -42,7 +42,7 @@ __host__ __device__ cu::vec3& cu::vec3::operator*=(float t) {
 }
 
 __host__ __device__ cu::vec3& cu::vec3::operator/=(float t) {
-	float k = 1.0 / t;
+	float k = 1.0f / t;
 	data[0] *= k;
 	data[1] *= k;
 	data[2] *= k;
@@ -57,41 +57,40 @@ __host__ __device__ float cu::vec3::length_squared() const {
 	return dot(*this, *this);
 }
 
-__host__ __device__ void cu::vec3::make_unit_vector() {
-	data[0] /= length();
-	data[1] /= length();
-	data[2] /= length();
+__host__ __device__ cu::vec3 cu::normalize(const vec3& v) {
+	float vectorLength = v.length();
+	return cu::vec3(v.x() / vectorLength, v.y() / vectorLength, v.z() / vectorLength);
 }
 
-__host__ __device__ cu::vec3 operator+(const cu::vec3& v1, const cu::vec3& v2) {
+__host__ __device__ cu::vec3 cu::operator+(const cu::vec3& v1, const cu::vec3& v2) {
 	return cu::vec3(v1.x() + v2.x(), v1.y() + v2.y(), v1.z() + v2.z());
 }
 
-__host__ __device__ cu::vec3 operator-(const cu::vec3& v1, const cu::vec3& v2) {
+__host__ __device__ cu::vec3 cu::operator-(const cu::vec3& v1, const cu::vec3& v2) {
 	return cu::vec3(v1.x() - v2.x(), v1.y() - v2.y(), v1.z() - v2.z());
 }
 
-__host__ __device__ cu::vec3 operator*(const cu::vec3& v1, const cu::vec3& v2) {
+__host__ __device__ cu::vec3 cu::operator*(const cu::vec3& v1, const cu::vec3& v2) {
 	return cu::vec3(v1.x() * v2.x(), v1.y() * v2.y(), v1.z() * v2.z());
 }
 
-__host__ __device__ cu::vec3 operator/(const cu::vec3& v1, const cu::vec3& v2) {
+__host__ __device__ cu::vec3 cu::operator/(const cu::vec3& v1, const cu::vec3& v2) {
 	return cu::vec3(v1.x() / v2.x(), v1.y() / v2.y(), v1.z() / v2.z());
 }
 
-__host__ __device__ cu::vec3 operator*(float t, const cu::vec3& v) {
+__host__ __device__ cu::vec3 cu::operator*(float t, const cu::vec3& v) {
 	return cu::vec3(t * v.x(), t * v.y(), t * v.z());
 }
 
-__host__ __device__ cu::vec3 operator/(const cu::vec3& v, float t) {
+__host__ __device__ cu::vec3 cu::operator/(const cu::vec3& v, float t) {
 	return cu::vec3(v.x() / t, v.y() / t, v.z() / t);
 }
 
-__host__ __device__ float dot(const cu::vec3& v1, const cu::vec3& v2) {
+__host__ __device__ float cu::dot(const cu::vec3& v1, const cu::vec3& v2) {
 	return v1.x() * v2.x() + v1.y() * v2.y() + v1.z() * v2.z();
 }
 
-__host__ __device__ cu::vec3 cross(const cu::vec3& v1, const cu::vec3& v2) {
+__host__ __device__ cu::vec3 cu::cross(const cu::vec3& v1, const cu::vec3& v2) {
 	return cu::vec3{ v1.y() * v2.z() - v1.z() * v2.y(), v1.z() * v2.x() - v1.x() * v2.z(), v1.x() * v2.y() - v1.y() * v2.x() };
 }
 

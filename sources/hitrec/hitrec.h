@@ -2,9 +2,9 @@
 
 #include <memory>
 #include <glm/glm.hpp>
-#include "ray.h"
-#include "utils.h"
-#include "scattering_record.h"
+#include "ray/ray.h"
+#include "utils/utils.h"
+#include "scattering_record/scattering_record.h"
 
 
 struct HitRecord {
