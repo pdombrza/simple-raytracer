@@ -19,7 +19,7 @@ __device__ std::optional<HitRecord> Sphere::hit(const Ray& ray, float rayTMin, f
 	auto discriminant = halfb * halfb - a * c;
 	if (discriminant < 0) return {};
 	
-	float sqrtDiscriminant = std::sqrt(discriminant);
+	float sqrtDiscriminant = sqrtf(discriminant);
 	float root = (halfb - sqrtDiscriminant) / a;
 	if (root <= rayTMin || root >= rayTMax) {
 		root = (halfb + sqrtDelta) / a;
