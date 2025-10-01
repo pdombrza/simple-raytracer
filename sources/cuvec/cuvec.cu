@@ -6,6 +6,13 @@ __host__ __device__ cu::vec3::vec3(float x, float y, float z) {
 	data[2] = z;
 }
 
+__host__ __device__ cu::vec3::vec3(std::initializer_list<float> list) {
+	auto it = list.begin();
+	for (int i = 0; i < 3 && it != list.end(); ++i, ++it) {
+		data[i] = *it;
+	}
+}
+
 __host__ __device__ cu::vec3& cu::vec3::operator+=(const cu::vec3& v) {
 	data[0] += v.x();
 	data[1] += v.y();
@@ -53,13 +60,8 @@ __host__ __device__ float cu::vec3::length() const {
 	return sqrtf(dot(*this, *this));
 }
 
-__host__ __device__ float cu::vec3::length_squared() const {
+__host__ __device__ float cu::vec3::lengthSquared() const {
 	return dot(*this, *this);
-}
-
-__host__ __device__ cu::vec3 cu::normalize(const vec3& v) {
-	float vectorLength = v.length();
-	return cu::vec3(v.x() / vectorLength, v.y() / vectorLength, v.z() / vectorLength);
 }
 
 __host__ __device__ cu::vec3 cu::operator+(const cu::vec3& v1, const cu::vec3& v2) {
@@ -82,6 +84,10 @@ __host__ __device__ cu::vec3 cu::operator*(float t, const cu::vec3& v) {
 	return cu::vec3(t * v.x(), t * v.y(), t * v.z());
 }
 
+__host__ __device__ cu::vec3 cu::operator*(const cu::vec3& v, float t) {
+	return cu::vec3(t * v.x(), t * v.y(), t * v.z());
+}
+
 __host__ __device__ cu::vec3 cu::operator/(const cu::vec3& v, float t) {
 	return cu::vec3(v.x() / t, v.y() / t, v.z() / t);
 }
@@ -92,6 +98,19 @@ __host__ __device__ float cu::dot(const cu::vec3& v1, const cu::vec3& v2) {
 
 __host__ __device__ cu::vec3 cu::cross(const cu::vec3& v1, const cu::vec3& v2) {
 	return cu::vec3{ v1.y() * v2.z() - v1.z() * v2.y(), v1.z() * v2.x() - v1.x() * v2.z(), v1.x() * v2.y() - v1.y() * v2.x() };
+}
+
+__host__ __device__ cu::vec3 cu::normalize(const vec3& v) {
+	float vectorLength = v.length();
+	return cu::vec3(v.x() / vectorLength, v.y() / vectorLength, v.z() / vectorLength);
+}
+
+__host__ __device__ cu::vec3 cu::clamp(const vec3& v, float min, float max) {
+	return cu::vec3(
+		v.x() < min ? min : (v.x() > max ? max : v.x()),
+		v.y() < min ? min : (v.y() > max ? max : v.y()),
+		v.z() < min ? min : (v.z() > max ? max : v.z())
+	);
 }
 
 inline std::istream& operator>>(std::istream& is, cu::vec3& t) {

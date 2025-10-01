@@ -5,4 +5,3 @@ target_link_libraries(HitRecord PRIVATE glm)
 
 target_include_directories(HitRecord PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(HitRecord PUBLIC ${PROJECT_SOURCE_DIR}/sources)
-

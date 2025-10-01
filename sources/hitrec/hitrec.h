@@ -3,20 +3,22 @@
 #include <memory>
 #include <glm/glm.hpp>
 #include "ray/ray.h"
+#include "cuvec/cuvec.h"
 #include "utils/utils.h"
 #include "scattering_record/scattering_record.h"
 
 
 struct HitRecord {
-	glm::vec3 p{};
-	glm::vec3 normal{};
-	float t;
-	bool frontFace;
+	__device__ cu::vec3 p{};
+	__device__ cu::vec3 normal{};
+	__device__ float t;
+	__device__ bool frontFace;
 
-	void setFaceNormal(const Ray& ray, const glm::vec3& outwardNormal) {
+	__device__ void setFaceNormal(const Ray& ray, const cu::vec3& outwardNormal) {
 		// outwardNormal is supposed to be normalized
-		frontFace = glm::dot(ray.getDirection(), outwardNormal) < 0;
-		normal = frontFace ? outwardNormal : -outwardNormal;
+		//frontFace = glm::dot(ray.getDirection(), outwardNormal) < 0;
+		//normal = frontFace ? outwardNormal : -outwardNormal;
+		return;
 	}
 };
 
