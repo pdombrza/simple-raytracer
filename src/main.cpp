@@ -1,12 +1,13 @@
 #include <iostream>
 #include <memory>
 #include <chrono>
+#include <cuda_runtime.h>
 
 #include <glm/glm.hpp>
 
 //#include "camera/camera.h"
 //#include "renderer/renderer.h"
-//#include "hittable/hittable.h"
+#include "hittable/hittable.h"
 //#include "hittablelist/hittablelist.h"
 //#include "material/material.h"
 #include "cudaray/cudaray.h"
@@ -25,6 +26,7 @@ int main() {
 	auto fb = std::make_unique<cu::vec3[]>(numPixels);
 	const auto startTime = std::chrono::steady_clock::now();
 	launchRenderer(fb.get(), nx, ny, xBlock, yBlock);
+
 	const auto endTime = std::chrono::steady_clock::now();
 	const std::chrono::duration<double> renderTime = endTime - startTime;
 	std::cout << "Render time: " << renderTime << std::endl;

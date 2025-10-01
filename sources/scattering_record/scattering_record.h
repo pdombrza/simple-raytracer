@@ -1,12 +1,11 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/epsilon.hpp>
+#include <cuda_runtime.h>
 #include "ray/ray.h"
 #include "utils/utils.h"
 
 
 struct ScatteringRecord {
-	__device__ Ray ray{};
-	__device__ cu::vec3 attenuation{ 0.0f, 0.0f, 0.0f };
+	Ray ray{};
+	cu::vec3 attenuation{ 0.0f, 0.0f, 0.0f };
 };

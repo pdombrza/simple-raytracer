@@ -1,7 +1,8 @@
 #pragma once
 
 #include <memory>
-#include <glm/glm.hpp>
+#include <cuda_runtime.h>
+#include <cuda/std/optional>
 #include "ray/ray.h"
 #include "cuvec/cuvec.h"
 #include "utils/utils.h"
@@ -9,10 +10,10 @@
 
 
 struct HitRecord {
-	__device__ cu::vec3 p{};
-	__device__ cu::vec3 normal{};
-	__device__ float t;
-	__device__ bool frontFace;
+	cu::vec3 p{};
+	cu::vec3 normal{};
+	float t;
+	bool frontFace;
 
 	__device__ void setFaceNormal(const Ray& ray, const cu::vec3& outwardNormal) {
 		// outwardNormal is supposed to be normalized
@@ -24,6 +25,6 @@ struct HitRecord {
 
 
 struct HitScatterRecord {
-	std::optional<HitRecord> hitRec = std::nullopt;
-	std::optional<ScatteringRecord> scatterRec = std::nullopt;
+	cuda::std::optional<HitRecord> hitRec = cuda::std::nullopt;
+	cuda::std::optional<ScatteringRecord> scatterRec = cuda::std::nullopt;
 };
