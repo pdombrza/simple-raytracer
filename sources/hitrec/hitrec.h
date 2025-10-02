@@ -17,8 +17,8 @@ struct HitRecord {
 
 	__device__ void setFaceNormal(const Ray& ray, const cu::vec3& outwardNormal) {
 		// outwardNormal is supposed to be normalized
-		//frontFace = glm::dot(ray.getDirection(), outwardNormal) < 0;
-		//normal = frontFace ? outwardNormal : -outwardNormal;
+		frontFace = cu::dot(ray.getDirection(), outwardNormal) < 0;
+		normal = frontFace ? outwardNormal : outwardNormal * -1.0f;
 		return;
 	}
 };

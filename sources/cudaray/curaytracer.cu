@@ -14,7 +14,7 @@ __device__ cu::vec3 color(const Ray& ray, HittableList* world) {
 	HitScatterRecord HSRec = world->hit(ray, 0.001f, INF);
 	if (HSRec.hitRec.has_value()) {
 		HitRecord hitrec = HSRec.hitRec.value();
-		return 0.5f * (hitrec.normal + cu::vec3(1.0f, 1.0f, 1.0f));
+		return 0.5f * cu::vec3(hitrec.normal.x() + 1.0f, hitrec.normal.y() + 1.0f, hitrec.normal.z() + 1.0f);
 	}
 
 	// gradient
@@ -29,15 +29,22 @@ __global__ void render(cu::vec3* fb, int x, int y, cu::vec3 bottomLeftCorner, cu
     if ((i >= x) || (j >= y)) return;
     int pixel_index = j * x + i;
     float u = float(i) / float(x);
-    float v = float(j) / float(y);
+    float v = 1.0f - float(j) / float(y);
     Ray r(origin, bottomLeftCorner + u * horizontal + v * vertical);
     fb[pixel_index] = color(r, world);
 }
 
 void launchRenderer(cu::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 	int numPixels = nx * ny;
+	float aspectRatio = (float)nx / (float)ny;
+	float viewportHeight = 2.0f;
+	float viewportWidth = aspectRatio * viewportHeight;
+	cu::vec3 horizontal = cu::vec3(viewportWidth, 0.0f, 0.0f);
+	cu::vec3 bottomLeftCorner = cu::vec3(-viewportWidth / 2.0f, -viewportHeight / 2.0f, -1.0f);
+
 	cu::vec3* devFb = nullptr;
 	checkCudaErrors(cudaMalloc((void**)&devFb, numPixels * sizeof(cu::vec3)));
+
 	Hittable** d_List;
 	checkCudaErrors(cudaMalloc((void**)&d_List, 2 * sizeof(Hittable*)));
 	HittableList* d_World;
@@ -49,8 +56,8 @@ void launchRenderer(cu::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 	dim3 blocks(nx / xBlock + 1, ny / yBlock + 1);
 	dim3 threads(xBlock, yBlock);
 	render<<<blocks, threads>>>(devFb, nx, ny,
-		cu::vec3(-2.0f, -1.0f, -1.0f),
-		cu::vec3(4.0f, 0.0f, 0.0f),
+		bottomLeftCorner,
+		horizontal,
 		cu::vec3(0.0f, 2.0f, 0.0f),
 		cu::vec3(0.0f, 0.0f, 0.0f),
 		d_World	
@@ -68,15 +75,16 @@ void launchRenderer(cu::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 	cudaDeviceReset();
 }
 
+
 __global__ void createWorld(Hittable** d_List, HittableList* d_World) {
 	if (threadIdx.x == 0 && blockIdx.x == 0) {
-		d_List[0] = new Sphere(cu::vec3(0.0f, 0.0f, -1.0f), 0.5f);
-		d_List[1] = new Sphere(cu::vec3(0.0f, -100.5f, -1.0f), 100.0f);
-		new(d_World) HittableList(d_List, 2);
+		d_List[0] = new Sphere(cu::vec3(0.0f, -100.5f, -1.0f), 100.0f); 
+		d_List[1] = new Sphere(cu::vec3(0.0f, 0.0f, -1.0f), 0.5f);
+		new(d_World) HittableList(d_List, 2, 2);
 	}
 }
 
-__global__ void destroyWorld(Hittable ** d_List, HittableList* d_World) {
+__global__ void destroyWorld(Hittable** d_List, HittableList* d_World) {
 	delete d_List[0];
 	delete d_List[1];
 	delete d_World;
