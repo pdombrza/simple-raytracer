@@ -1,9 +1,9 @@
 #include "camera.h"
 
-void Camera::initialize(int imgWidth, int imgHeight) {
+__device__ void Camera::initialize(int imgWidth, int imgHeight) {
 	center = orientation.lookFrom;
 	float theta = glm::radians(vFov);
-	float h = std::tan(theta / 2);
+	float h = tanf(theta / 2);
 	float viewportHeight = 2 * h * focusDist;
 	float viewportWidth = viewportHeight * ((float)imgWidth / imgHeight);
 
@@ -22,12 +22,12 @@ void Camera::initialize(int imgWidth, int imgHeight) {
 	startPixelLoc = viewportUpperLeft + 0.5f * (pixelDeltaU + pixelDeltaV);
 
 	// Camera defocus disk basis vectors calculations
-	float defocusRadius = focusDist * std::tan(glm::radians(defocusAngle / 2.0f));
+	float defocusRadius = focusDist * tanf(glm::radians(defocusAngle / 2.0f));
 	defocusDiskU = u * defocusRadius;
 	defocusDiskV = v * defocusRadius;
 }
 
-Ray Camera::getRay(float u, float v) const {
+__device__ Ray Camera::getRay(float u, float v) const {
 	glm::vec3 offset = Utils::random::sampleSquare();
 	glm::vec3 pixelSample = startPixelLoc + (u + offset.x) * pixelDeltaU + (v + offset.y) * pixelDeltaV;
 	glm::vec3 rayOrigin = (defocusAngle <= 0) ? center : defocusDiskSample();

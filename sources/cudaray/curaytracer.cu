@@ -35,14 +35,6 @@ __global__ void render(glm::vec3* fb, int x, int y, glm::vec3 bottomLeftCorner, 
     fb[pixelIdx] = color(r, world);
 }
 
-__global__ void renderInit(int x, int y, curandState* randState) {
-	int i = threadIdx.x + blockIdx.x * blockDim.x;
-	int j = threadIdx.y + blockIdx.y * blockDim.y;
-	if ((i >= x) || (j >= y)) return;
-	int pixelIdx = j * x + i;
-	curand_init(1984, pixelIdx, 0, &randState[pixelIdx]);
-}
-
 void launchRenderer(glm::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 	int numPixels = nx * ny;
 	float aspectRatio = (float)nx / (float)ny;
@@ -67,7 +59,7 @@ void launchRenderer(glm::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 
 	dim3 blocks(nx / xBlock + 1, ny / yBlock + 1);
 	dim3 threads(xBlock, yBlock);
-	renderInit<<<blocks, threads>>>(nx, ny, d_randState);
+	renderInit<<<blocks, threads>>>(d_randStates, nx, ny);
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 	render<<<blocks, threads>>>(d_Fb, nx, ny,

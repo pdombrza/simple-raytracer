@@ -10,6 +10,7 @@
 #include "hittable/hittable.h"
 #include "hittablelist/hittablelist.h"
 #include "hitrec/hitrec.h"
+#include "utils/utils.h"
 
 #define checkCudaErrors(val) checkCuda( (val), #val, __FILE__, __LINE__ )
 
