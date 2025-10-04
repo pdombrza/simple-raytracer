@@ -3,6 +3,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <random>
+#include <curand_kernel.h>
 #include <utility>
 #include <optional>
 

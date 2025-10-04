@@ -1,5 +1,5 @@
 set(CMAKE_CXX_STANDARD 23)
-add_library(HitRecord hitrec.cpp hitrec.h)
+add_library(HitRecord "hitrec.cu" hitrec.h)
 
 target_link_libraries(HitRecord PRIVATE CUDA::cudart CUDA::cuda_driver glm)
 

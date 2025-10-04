@@ -43,7 +43,6 @@ add_subdirectory(sources/utils)
 add_subdirectory(sources/scattering_record)
 add_subdirectory(sources/window)
 add_subdirectory(sources/cudaray)
-add_subdirectory(sources/cuvec)
 
 add_compile_definitions(SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -66,6 +65,6 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${CUDAToolkit_INCLUDE_DIRS})
 
 
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Cudaray Cuvec Ray Window)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Cudaray Ray Window)
 
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm)

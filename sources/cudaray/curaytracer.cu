@@ -10,20 +10,20 @@ void checkCuda(cudaError_t result, char const* const func, const char* const fil
     }
 }
 
-__device__ cu::vec3 color(const Ray& ray, HittableList* world) {
+__device__ glm::vec3 color(const Ray& ray, HittableList* world) {
 	HitScatterRecord HSRec = world->hit(ray, 0.001f, INF);
 	if (HSRec.hitRec.has_value()) {
 		HitRecord hitrec = HSRec.hitRec.value();
-		return 0.5f * cu::vec3(hitrec.normal.x() + 1.0f, hitrec.normal.y() + 1.0f, hitrec.normal.z() + 1.0f);
+		return 0.5f * glm::vec3(hitrec.normal.x + 1.0f, hitrec.normal.y + 1.0f, hitrec.normal.z + 1.0f);
 	}
 
 	// gradient
-	cu::vec3 direction = ray.getDirection();
-	float a = 0.5f * (direction.y() + 1.0f);
-	return (1.0f - a) * cu::vec3(1.0f, 1.0f, 1.0f) + a * cu::vec3(0.5f, 0.7f, 1.0f);
+	glm::vec3 direction = ray.getDirection();
+	float a = 0.5f * (direction.y + 1.0f);
+	return (1.0f - a) * glm::vec3(1.0f, 1.0f, 1.0f) + a * glm::vec3(0.5f, 0.7f, 1.0f);
 }
 
-__global__ void render(cu::vec3* fb, int x, int y, cu::vec3 bottomLeftCorner, cu::vec3 horizontal, cu::vec3 vertical, cu::vec3 origin, HittableList* world) {
+__global__ void render(glm::vec3* fb, int x, int y, glm::vec3 bottomLeftCorner, glm::vec3 horizontal, glm::vec3 vertical, glm::vec3 origin, HittableList* world) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if ((i >= x) || (j >= y)) return;
@@ -34,16 +34,16 @@ __global__ void render(cu::vec3* fb, int x, int y, cu::vec3 bottomLeftCorner, cu
     fb[pixel_index] = color(r, world);
 }
 
-void launchRenderer(cu::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
+void launchRenderer(glm::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 	int numPixels = nx * ny;
 	float aspectRatio = (float)nx / (float)ny;
 	float viewportHeight = 2.0f;
 	float viewportWidth = aspectRatio * viewportHeight;
-	cu::vec3 horizontal = cu::vec3(viewportWidth, 0.0f, 0.0f);
-	cu::vec3 bottomLeftCorner = cu::vec3(-viewportWidth / 2.0f, -viewportHeight / 2.0f, -1.0f);
+	glm::vec3 horizontal = glm::vec3(viewportWidth, 0.0f, 0.0f);
+	glm::vec3 bottomLeftCorner = glm::vec3(-viewportWidth / 2.0f, -viewportHeight / 2.0f, -1.0f);
 
-	cu::vec3* devFb = nullptr;
-	checkCudaErrors(cudaMalloc((void**)&devFb, numPixels * sizeof(cu::vec3)));
+	glm::vec3* devFb = nullptr;
+	checkCudaErrors(cudaMalloc((void**)&devFb, numPixels * sizeof(glm::vec3)));
 
 	Hittable** d_List;
 	checkCudaErrors(cudaMalloc((void**)&d_List, 2 * sizeof(Hittable*)));
@@ -57,9 +57,9 @@ void launchRenderer(cu::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 	dim3 threads(xBlock, yBlock);
 	render<<<blocks, threads>>>(devFb, nx, ny,
 		bottomLeftCorner,
-		horizontal,
-		cu::vec3(0.0f, 2.0f, 0.0f),
-		cu::vec3(0.0f, 0.0f, 0.0f),
+		horizontal	,
+		glm::vec3(0.0f, 2.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
 		d_World	
 		);
 
@@ -70,7 +70,7 @@ void launchRenderer(cu::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 
 	checkCudaErrors(cudaFree(d_List));
 	checkCudaErrors(cudaFree(d_World));
-	checkCudaErrors(cudaMemcpy(fb, devFb, numPixels * sizeof(cu::vec3), cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaMemcpy(fb, devFb, numPixels * sizeof(glm::vec3), cudaMemcpyDeviceToHost));
 	checkCudaErrors(cudaFree(devFb));
 	cudaDeviceReset();
 }
@@ -78,8 +78,8 @@ void launchRenderer(cu::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 
 __global__ void createWorld(Hittable** d_List, HittableList* d_World) {
 	if (threadIdx.x == 0 && blockIdx.x == 0) {
-		d_List[0] = new Sphere(cu::vec3(0.0f, -100.5f, -1.0f), 100.0f); 
-		d_List[1] = new Sphere(cu::vec3(0.0f, 0.0f, -1.0f), 0.5f);
+		d_List[0] = new Sphere(glm::vec3(0.0f, -100.5f, -1.0f), 100.0f);
+		d_List[1] = new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f);
 		new(d_World) HittableList(d_List, 2, 2);
 	}
 }

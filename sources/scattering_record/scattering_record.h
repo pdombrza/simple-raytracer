@@ -7,5 +7,5 @@
 
 struct ScatteringRecord {
 	Ray ray{};
-	cu::vec3 attenuation{ 0.0f, 0.0f, 0.0f };
+	glm::vec3 attenuation{ 0.0f, 0.0f, 0.0f };
 };
