@@ -23,15 +23,24 @@ __device__ glm::vec3 color(const Ray& ray, HittableList* world) {
 	return (1.0f - a) * glm::vec3(1.0f, 1.0f, 1.0f) + a * glm::vec3(0.5f, 0.7f, 1.0f);
 }
 
-__global__ void render(glm::vec3* fb, int x, int y, glm::vec3 bottomLeftCorner, glm::vec3 horizontal, glm::vec3 vertical, glm::vec3 origin, HittableList* world) {
+__global__ void render(glm::vec3* fb, int x, int y, glm::vec3 bottomLeftCorner, glm::vec3 horizontal, glm::vec3 vertical, glm::vec3 origin, HittableList* world, curandState *randState) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if ((i >= x) || (j >= y)) return;
-    int pixel_index = j * x + i;
-    float u = float(i) / float(x);
-    float v = 1.0f - float(j) / float(y);
+    int pixelIdx = j * x + i;
+	curandState localRandState = randState[pixelIdx];
+    float u = float(i + curand_uniform(&localRandState)) / float(x);
+    float v = 1.0f - float(j + curand_uniform(&localRandState)) / float(y);
     Ray r(origin, bottomLeftCorner + u * horizontal + v * vertical);
-    fb[pixel_index] = color(r, world);
+    fb[pixelIdx] = color(r, world);
+}
+
+__global__ void renderInit(int x, int y, curandState* randState) {
+	int i = threadIdx.x + blockIdx.x * blockDim.x;
+	int j = threadIdx.y + blockIdx.y * blockDim.y;
+	if ((i >= x) || (j >= y)) return;
+	int pixelIdx = j * x + i;
+	curand_init(1984, pixelIdx, 0, &randState[pixelIdx]);
 }
 
 void launchRenderer(glm::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
@@ -42,8 +51,8 @@ void launchRenderer(glm::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 	glm::vec3 horizontal = glm::vec3(viewportWidth, 0.0f, 0.0f);
 	glm::vec3 bottomLeftCorner = glm::vec3(-viewportWidth / 2.0f, -viewportHeight / 2.0f, -1.0f);
 
-	glm::vec3* devFb = nullptr;
-	checkCudaErrors(cudaMalloc((void**)&devFb, numPixels * sizeof(glm::vec3)));
+	glm::vec3* d_Fb = nullptr;
+	checkCudaErrors(cudaMalloc((void**)&d_Fb, numPixels * sizeof(glm::vec3)));
 
 	Hittable** d_List;
 	checkCudaErrors(cudaMalloc((void**)&d_List, 2 * sizeof(Hittable*)));
@@ -53,14 +62,21 @@ void launchRenderer(glm::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 
+	curandState* d_randState;
+	checkCudaErrors(cudaMalloc((void**)&d_randState, numPixels * sizeof(curandState)));
+
 	dim3 blocks(nx / xBlock + 1, ny / yBlock + 1);
 	dim3 threads(xBlock, yBlock);
-	render<<<blocks, threads>>>(devFb, nx, ny,
+	renderInit<<<blocks, threads>>>(nx, ny, d_randState);
+	checkCudaErrors(cudaGetLastError());
+	checkCudaErrors(cudaDeviceSynchronize());
+	render<<<blocks, threads>>>(d_Fb, nx, ny,
 		bottomLeftCorner,
-		horizontal	,
+		horizontal,
 		glm::vec3(0.0f, 2.0f, 0.0f),
 		glm::vec3(0.0f, 0.0f, 0.0f),
-		d_World	
+		d_World,
+		d_randState
 		);
 
 	checkCudaErrors(cudaGetLastError());
@@ -70,8 +86,9 @@ void launchRenderer(glm::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 
 	checkCudaErrors(cudaFree(d_List));
 	checkCudaErrors(cudaFree(d_World));
-	checkCudaErrors(cudaMemcpy(fb, devFb, numPixels * sizeof(glm::vec3), cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaFree(devFb));
+	checkCudaErrors(cudaMemcpy(fb, d_Fb, numPixels * sizeof(glm::vec3), cudaMemcpyDeviceToHost));
+	checkCudaErrors(cudaFree(d_Fb));
+	checkCudaErrors(cudaFree(d_randState));
 	cudaDeviceReset();
 }
 
