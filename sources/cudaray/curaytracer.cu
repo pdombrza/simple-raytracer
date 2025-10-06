@@ -10,18 +10,44 @@ void checkCuda(cudaError_t result, char const* const func, const char* const fil
     }
 }
 
-__device__ glm::vec3 color(const Ray& ray, HittableList* world) {
-	HitScatterRecord HSRec = world->hit(ray, 0.001f, INF);
-	if (HSRec.hitRec.has_value()) {
-		HitRecord hitrec = HSRec.hitRec.value();
-		return 0.5f * glm::vec3(hitrec.normal.x + 1.0f, hitrec.normal.y + 1.0f, hitrec.normal.z + 1.0f);
+__device__ glm::vec3 color(const Ray& ray, HittableList* world, curandState* randState) {
+	Ray currentRay = ray;
+	float attenuation = 1.0f;
+	for (int i = 0; i < 100; i++) { // depth = 50
+		HitScatterRecord HSRec = world->hit(currentRay, 0.001f, INF);
+		if (HSRec.hitRec.has_value()) {
+			HitRecord hitrec = HSRec.hitRec.value();
+			glm::vec3 target = hitrec.p + hitrec.normal + utils::random::randomVec3InSphere(randState);
+			attenuation *= 0.5f;
+			currentRay = Ray(hitrec.p, target - hitrec.p);
+		}
+		else {
+			glm::vec3 direction = glm::normalize(currentRay.getDirection());
+			float a = 0.5f * (direction.y + 1.0f);
+			glm::vec3 c = (1.0f - a) * glm::vec3(1.0f, 1.0f, 1.0f) + a * glm::vec3(0.5f, 0.7f, 1.0f);
+			return attenuation * c;
+		}
+	}
+	return glm::vec3(0.0f, 0.0f, 0.0f); // exceeded recursion depth
+}
+
+__device__ glm::vec3 colorPixel(int i, int j, int nx, int ny, HittableList* world, curandState* randStates, glm::vec3 origin, glm::vec3 horizontal, glm::vec3 vertical, glm::vec3 bottomLeftCorner) {
+	curandState localState = randStates[j * nx + i];
+	glm::vec3 col(0.0f);
+
+	for (int s = 0; s < 100; s++) {
+		float u = (i + curand_uniform(&localState)) / float(nx);
+		float v = 1.0f - (j + curand_uniform(&localState)) / float(ny);
+		Ray r(origin, bottomLeftCorner + u * horizontal + v * vertical - origin);
+		col += color(r, world, &localState);
 	}
 
-	// gradient
-	glm::vec3 direction = ray.getDirection();
-	float a = 0.5f * (direction.y + 1.0f);
-	return (1.0f - a) * glm::vec3(1.0f, 1.0f, 1.0f) + a * glm::vec3(0.5f, 0.7f, 1.0f);
+	col /= float(100);
+	randStates[j * nx + i] = localState;
+	col = glm::sqrt(col); // gamma correction
+	return col;
 }
+
 
 __global__ void render(glm::vec3* fb, int x, int y, glm::vec3 bottomLeftCorner, glm::vec3 horizontal, glm::vec3 vertical, glm::vec3 origin, HittableList* world, curandState *randState) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
@@ -32,7 +58,7 @@ __global__ void render(glm::vec3* fb, int x, int y, glm::vec3 bottomLeftCorner, 
     float u = float(i + curand_uniform(&localRandState)) / float(x);
     float v = 1.0f - float(j + curand_uniform(&localRandState)) / float(y);
     Ray r(origin, bottomLeftCorner + u * horizontal + v * vertical);
-    fb[pixelIdx] = color(r, world);
+	fb[pixelIdx] = colorPixel(i, j, x, y, world, randState, origin, horizontal, vertical, bottomLeftCorner);
 }
 
 void launchRenderer(glm::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
@@ -54,12 +80,12 @@ void launchRenderer(glm::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 
-	curandState* d_randState;
-	checkCudaErrors(cudaMalloc((void**)&d_randState, numPixels * sizeof(curandState)));
+	curandState* d_randStates;
+	checkCudaErrors(cudaMalloc((void**)&d_randStates, numPixels * sizeof(curandState)));
 
 	dim3 blocks(nx / xBlock + 1, ny / yBlock + 1);
 	dim3 threads(xBlock, yBlock);
-	renderInit<<<blocks, threads>>>(d_randStates, nx, ny);
+	utils::random::randomInit<<<blocks, threads>>>(d_randStates, nx, ny);
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 	render<<<blocks, threads>>>(d_Fb, nx, ny,
@@ -68,7 +94,7 @@ void launchRenderer(glm::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 		glm::vec3(0.0f, 2.0f, 0.0f),
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		d_World,
-		d_randState
+		d_randStates
 		);
 
 	checkCudaErrors(cudaGetLastError());
@@ -80,7 +106,7 @@ void launchRenderer(glm::vec3* fb, int nx, int ny, int xBlock, int yBlock) {
 	checkCudaErrors(cudaFree(d_World));
 	checkCudaErrors(cudaMemcpy(fb, d_Fb, numPixels * sizeof(glm::vec3), cudaMemcpyDeviceToHost));
 	checkCudaErrors(cudaFree(d_Fb));
-	checkCudaErrors(cudaFree(d_randState));
+	checkCudaErrors(cudaFree(d_randStates));
 	cudaDeviceReset();
 }
 
@@ -94,7 +120,9 @@ __global__ void createWorld(Hittable** d_List, HittableList* d_World) {
 }
 
 __global__ void destroyWorld(Hittable** d_List, HittableList* d_World) {
-	delete d_List[0];
-	delete d_List[1];
+	int capacity = d_World->getCapacity();
+	for (int i = 0; i < capacity; i++) {
+		delete d_List[i];
+	}
 	delete d_World;
 }

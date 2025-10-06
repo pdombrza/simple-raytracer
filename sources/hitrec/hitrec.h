@@ -4,7 +4,6 @@
 #include <cuda_runtime.h>
 #include <cuda/std/optional>
 #include "ray/ray.h"
-#include "utils/utils.h"
 #include "scattering_record/scattering_record.h"
 
 

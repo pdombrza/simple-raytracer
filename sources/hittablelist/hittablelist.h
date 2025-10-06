@@ -6,7 +6,6 @@
 
 #include "hittable/hittable.h"
 #include "material/material.h"
-#include "utils/utils.h"
 #include "hitrec/hitrec.h"
 #include "ray/ray.h"
 
@@ -22,4 +21,6 @@ public:
 	__device__ void clear();
 	__device__ void add(Hittable* hittable);
 	__device__ HitScatterRecord hit(const Ray& ray, float rayTMin, float rayTMax) const;
+	__device__ int getObjCount() const { return objCount; };
+	__device__ int getCapacity() const { return capacity; };
 };

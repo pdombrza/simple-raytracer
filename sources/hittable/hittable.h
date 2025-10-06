@@ -10,7 +10,6 @@
 #include <glm/glm.hpp>
 // my libs
 #include "ray/ray.h"
-#include "utils/utils.h"
 #include "hitrec/hitrec.h"
 #include "material/material.h"
 
