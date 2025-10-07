@@ -40,8 +40,8 @@ public:
 	__device__ Camera(float aspectRatio, float focalLength, float viewportHeight, const glm::vec3& center) : aspectRatio(aspectRatio), center(center) {};
 	__device__ ~Camera() = default;
 	__device__ void initialize(int imgWidth, int imgHeight);
-	__device__ glm::vec3 defocusDiskSample() const;
-	__device__ Ray getRay(float h, float w) const;
+	__device__ glm::vec3 defocusDiskSample(utils::random::RNG& rng) const;
+	__device__ Ray getRay(float h, float w, utils::random::RNG& rng) const;
 	__device__ void setAspectRatio(float newAspectRatio) { aspectRatio = newAspectRatio; };
 	__device__ float getAspectRatio() const { return aspectRatio; };
 	__device__ void setCenter(glm::vec3& newCameraCenter) { center = newCameraCenter; };
