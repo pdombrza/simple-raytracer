@@ -10,14 +10,14 @@ void checkCuda(cudaError_t result, char const* const func, const char* const fil
     }
 }
 
-__device__ glm::vec3 color(const Ray& ray, HittableList* world, curandState* randState) {
+__device__ glm::vec3 color(const Ray& ray, HittableList* world, utils::random::RNG& rng) {
 	Ray currentRay = ray;
 	float attenuation = 1.0f;
 	for (int i = 0; i < 100; i++) { // depth = 50
 		HitScatterRecord HSRec = world->hit(currentRay, 0.001f, INF);
 		if (HSRec.hitRec.has_value()) {
 			HitRecord hitrec = HSRec.hitRec.value();
-			glm::vec3 target = hitrec.p + hitrec.normal + utils::random::randomVec3InSphere(randState);
+			glm::vec3 target = hitrec.p + hitrec.normal + rng.randomVec3InSphere();
 			attenuation *= 0.5f;
 			currentRay = Ray(hitrec.p, target - hitrec.p);
 		}
@@ -31,19 +31,17 @@ __device__ glm::vec3 color(const Ray& ray, HittableList* world, curandState* ran
 	return glm::vec3(0.0f, 0.0f, 0.0f); // exceeded recursion depth
 }
 
-__device__ glm::vec3 colorPixel(int i, int j, int nx, int ny, HittableList* world, curandState* randStates, glm::vec3 origin, glm::vec3 horizontal, glm::vec3 vertical, glm::vec3 bottomLeftCorner) {
-	curandState localState = randStates[j * nx + i];
+__device__ glm::vec3 colorPixel(int i, int j, int nx, int ny, HittableList* world, utils::random::RNG& rng, glm::vec3 origin, glm::vec3 horizontal, glm::vec3 vertical, glm::vec3 bottomLeftCorner) {
 	glm::vec3 col(0.0f);
 
 	for (int s = 0; s < 100; s++) {
-		float u = (i + curand_uniform(&localState)) / float(nx);
-		float v = 1.0f - (j + curand_uniform(&localState)) / float(ny);
+		float u = (i + rng.getRandomUniform()) / float(nx);
+		float v = 1.0f - (j + rng.getRandomUniform()) / float(ny);
 		Ray r(origin, bottomLeftCorner + u * horizontal + v * vertical - origin);
-		col += color(r, world, &localState);
+		col += color(r, world, rng);
 	}
 
 	col /= float(100);
-	randStates[j * nx + i] = localState;
 	col = glm::sqrt(col); // gamma correction
 	return col;
 }
@@ -55,10 +53,8 @@ __global__ void render(glm::vec3* fb, int x, int y, glm::vec3 bottomLeftCorner, 
     if ((i >= x) || (j >= y)) return;
     int pixelIdx = j * x + i;
 	curandState localRandState = randState[pixelIdx];
-    float u = float(i + curand_uniform(&localRandState)) / float(x);
-    float v = 1.0f - float(j + curand_uniform(&localRandState)) / float(y);
-    Ray r(origin, bottomLeftCorner + u * horizontal + v * vertical);
-	fb[pixelIdx] = colorPixel(i, j, x, y, world, randState, origin, horizontal, vertical, bottomLeftCorner);
+	utils::random::RNG rng(&localRandState);
+	fb[pixelIdx] = colorPixel(i, j, x, y, world, rng, origin, horizontal, vertical, bottomLeftCorner);
 }
 
 void launchRenderer(glm::vec3* fb, int nx, int ny, int xBlock, int yBlock) {

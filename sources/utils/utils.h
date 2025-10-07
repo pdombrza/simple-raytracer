@@ -17,16 +17,24 @@
 
 namespace utils {
 	namespace random {
+		class RNG {
+		private:
+			curandState* state;
+		public:
+			__device__ explicit RNG(curandState* state) : state(state) {};
+			__device__ ~RNG() = default;
+			template<typename T>
+			__device__ T getRandom(T min, T max);
+			__device__ float getRandomUniform();
+			__device__ glm::vec3 sampleSquare();
+			template<typename T>
+			__device__ glm::vec<3, T, glm::defaultp> randomVec3(T min, T max);
+			__device__ glm::vec3 randomVec3Norm();
+			__device__ glm::vec3 randomVec3InSphere();
+			__device__ glm::vec3 randomVec3OnHemisphere(const glm::vec3& normal);
+			__device__ glm::vec3 randomVec3InDisk();
+		};
+		
 		__global__ void randomInit(curandState* randStates, int x, int y);
-		template<typename T>
-		__device__ T getRandom(curandState* state, T min, T max);
-		__device__ float getRandomNorm(curandState* state);
-		__device__ glm::vec3 sampleSquare(curandState* state);
-		template<typename T>
-		__device__ glm::vec<3, T, glm::defaultp> randomVec3(curandState* state, T min, T max);
-		__device__ glm::vec3 randomVec3Norm(curandState* state);
-		__device__ glm::vec3 randomVec3InSphere(curandState* state);
-		__device__ glm::vec3 randomVec3OnHemisphere(curandState* state, const glm::vec3& normal);
-		__device__ glm::vec3 randomVec3InDisk(curandState* state);
 	}
 }
