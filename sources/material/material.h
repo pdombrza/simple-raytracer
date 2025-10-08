@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/epsilon.hpp>
 #include <cuda/std/optional>
 #include <cuda_runtime.h>
 

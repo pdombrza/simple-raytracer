@@ -31,14 +31,14 @@ private:
 	glm::vec3 defocusDiskV{};
 	CameraOrientation orientation{};
 public:
-	__device__ Camera() {};
-	__device__ Camera(CameraOrientation orientation) : orientation(orientation) {};
-	__device__ Camera(float aspectRatio) : aspectRatio(aspectRatio) {};
+	__host__ __device__ Camera() {};
+	__host__ __device__ Camera(CameraOrientation orientation) : orientation(orientation) {};
+	__host__ __device__ Camera(float aspectRatio) : aspectRatio(aspectRatio) {};
 	//Camera(float vFov) : vFov(vFov) {};
-	__device__ Camera(float vFov, float aspectRatio) : vFov(vFov), aspectRatio(aspectRatio) {};
-	__device__ Camera(CameraOrientation orientation, float vFov, float aspectRatio) : orientation(orientation), vFov(vFov), aspectRatio(aspectRatio) {};
-	__device__ Camera(float aspectRatio, float focalLength, float viewportHeight, const glm::vec3& center) : aspectRatio(aspectRatio), center(center) {};
-	__device__ ~Camera() = default;
+	__host__ __device__ Camera(float vFov, float aspectRatio) : vFov(vFov), aspectRatio(aspectRatio) {};
+	__host__ __device__ Camera(CameraOrientation orientation, float vFov, float aspectRatio) : orientation(orientation), vFov(vFov), aspectRatio(aspectRatio) {};
+	__host__ __device__ Camera(float aspectRatio, float focalLength, float viewportHeight, const glm::vec3& center) : aspectRatio(aspectRatio), center(center) {};
+	__host__ __device__ ~Camera() = default;
 	__device__ void initialize(int imgWidth, int imgHeight);
 	__device__ glm::vec3 defocusDiskSample(utils::random::RNG& rng) const;
 	__device__ Ray getRay(float h, float w, utils::random::RNG& rng) const;

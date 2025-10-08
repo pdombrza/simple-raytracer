@@ -14,7 +14,7 @@ __device__ void HittableList::add(Hittable* hittable) {
 	}
 }
 
-__device__ HitScatterRecord HittableList::hit(const Ray& ray, float rayTMin, float rayTMax) const {
+__device__ HitScatterRecord HittableList::hit(const Ray& ray, float rayTMin, float rayTMax, utils::random::RNG& rng) const {
 	HitRecord closestHit;
 	HitScatterRecord HSRec{};
 	float closestDist = rayTMax;
@@ -33,8 +33,8 @@ __device__ HitScatterRecord HittableList::hit(const Ray& ray, float rayTMin, flo
 	}
 	if (!hitAnything) return HSRec;
 	HSRec.hitRec = closestHit;
-	/*std::optional<ScatteringRecord> sRec = closestObj->getMaterial()->scatter(ray, closestHit);
-	HSRec.scatterRec = sRec;*/
+	cuda::std::optional<ScatteringRecord> sRec = closestObj->getMaterial()->scatter(ray, closestHit, rng);
+	HSRec.scatterRec = sRec;
 
 	return HSRec;
 }

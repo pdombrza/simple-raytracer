@@ -31,13 +31,13 @@ __device__ cuda::std::optional<HitRecord> Sphere::hit(const Ray& ray, float rayT
 	return record;
 }
 
-//void Sphere::setMaterial(std::shared_ptr<Material> mat) {
-//	material = mat;
-//}
-//
-//std::shared_ptr<Material> Sphere::getMaterial() const {
-//	return material;
-//}
+__device__ void Sphere::setMaterial(Material* mat) {
+	material = mat;
+}
+
+__device__ Material* Sphere::getMaterial() const {
+	return material;
+}
 
 __device__ glm::vec3 Sphere::getCenter() const {
 	return center;

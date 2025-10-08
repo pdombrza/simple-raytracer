@@ -1,5 +1,5 @@
 set(CMAKE_CXX_STANDARD 23)
-add_library(Material material.cpp material.h)
+add_library(Material material.cu material.h)
 
 target_link_libraries(Material PRIVATE CUDA::cudart CUDA::cuda_driver glm)
 

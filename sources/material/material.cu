@@ -1,7 +1,7 @@
 #include "material.h"
 
 
-__device__ std::optional<ScatteringRecord> Lambertian::scatter(const Ray& rayIn, const HitRecord& rec, utils::random::RNG& rng) const {
+__device__ cuda::std::optional<ScatteringRecord> Lambertian::scatter(const Ray& rayIn, const HitRecord& rec, utils::random::RNG& rng) const {
 	glm::vec3 scatterDirection = rec.normal + rng.randomVec3InSphere();
 
 	// Catch degenerate scatter direction
@@ -13,7 +13,7 @@ __device__ std::optional<ScatteringRecord> Lambertian::scatter(const Ray& rayIn,
 }
 
 
-__device__ std::optional<ScatteringRecord> Metal::scatter(const Ray& rayIn, const HitRecord& rec, utils::random::RNG& rng) const {
+__device__ cuda::std::optional<ScatteringRecord> Metal::scatter(const Ray& rayIn, const HitRecord& rec, utils::random::RNG& rng) const {
 	glm::vec3 reflected = glm::reflect(rayIn.getDirection(), rec.normal) + fuzziness * rng.randomVec3InSphere();
 	Ray scattered = Ray(rec.p, reflected);
 	if (glm::dot(reflected, rec.normal) > 0) {
@@ -26,7 +26,7 @@ __device__ std::optional<ScatteringRecord> Metal::scatter(const Ray& rayIn, cons
 }
 
 
-__device__ std::optional<ScatteringRecord> Dielectric::scatter(const Ray& rayIn, const HitRecord& rec, utils::random::RNG& rng) const {
+__device__ cuda::std::optional<ScatteringRecord> Dielectric::scatter(const Ray& rayIn, const HitRecord& rec, utils::random::RNG& rng) const {
 	glm::vec3 attenuation{ 1.0f, 1.0f, 1.0f };
 	const float refractionRatio = rec.frontFace ? (1.0f / refractionIndex) : refractionIndex;
 

@@ -1,5 +1,5 @@
 set(CMAKE_CXX_STANDARD 23)
-add_library(Camera "camera.cu" camera.h)
+add_library(Camera camera.cu camera.h)
 
 target_link_libraries(Camera PRIVATE CUDA::cudart CUDA::cuda_driver glm)
 
