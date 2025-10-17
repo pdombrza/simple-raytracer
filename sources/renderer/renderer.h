@@ -8,13 +8,17 @@
 #include <fstream>
 #include <execution>
 
+#include <cuda_runtime.h>
+
 #include "ray/ray.h"
 #include "hitrec/hitrec.h"
+#include "hittable/hittable.h"
 #include "hittablelist/hittablelist.h"
 #include "material/material.h"
 #include "camera/camera.h"
 #include "tobmp/tobmp.h"
 #include "color/color.h"
+#include "cudaray/cudaray.h"
 
 
 class IRenderer {
@@ -73,4 +77,43 @@ public:
 	using MT_BMPRenderer::MT_BMPRenderer;
 	virtual int render(Camera& camera) override;
 	std::shared_ptr<uint8_t[]> getRgbBuffer() { return rgbBuffer; };
+};
+
+
+class CudaRenderer : public IRenderer {
+private:
+	std::shared_ptr<glm::vec3[]> h_Fb;
+	Framebuffer d_Fb;
+	Camera* d_camera;
+	Hittable** d_List;
+	HittableList* d_World;
+	curandState* d_randStates;
+protected:
+	HittableList scene;
+	int imgWidth = 400;
+	int imgHeight = 225;
+	int samplesPerPixel = 32;
+	int maxDepth = 10;
+	int imgHeight{};
+	int xBlock = 16;
+	int yBlock = 16;
+	float pixelSamplesScale{};
+	virtual void initRenderer();
+public:
+	CudaRenderer(HittableList& scene) : scene(scene), d_Fb(imgWidth, imgHeight) { initRenderer() };
+	CudaRenderer(HittableList& scene, int imgWidth, int imgHeight, int samplesPerPixel, int maxDepth) : scene(scene), imgWidth(imgWidth), imgHeight(imgHeight), samplesPerPixel(samplesPerPixel), maxDepth(maxDepth), d_Fb(imgWidth, imgHeight) { initRenderer()  };
+	CudaRenderer(HittableList& scene, int imgWidth, int imgHeight) : scene(scene), imgWidth(imgWidth), imgHeight(imgHeight), d_Fb(imgWidth, imgHeight) { initRenderer() };
+	~CudaRenderer();
+	virtual void setXBlock(int newXBlock) { xBlock = newXBlock; };
+	virtual int getXBlock() const { return xBlock; };
+	virtual void setYBlock(int newYBlock) { yBlock = newYBlock; };
+	virtual int getYBlock() const { return yBlock; };
+	virtual void setScene(HittableList& newScene) override { scene = newScene; };
+	virtual HittableList getScene() const override { return scene; };
+	virtual void setImgWidth(int newImgWidth) { imgWidth = newImgWidth; };
+	virtual int getImgWidth() const { return imgWidth; };
+	virtual void setImgHeight(int newImgHeight) { imgHeight = newImgHeight; };
+	virtual int getImgHeight() const { return imgHeight; };
+	virtual int render(Camera& camera) override;
+	std::shared_ptr<glm::vec3[]> getHostFramebuffer() const { return fb; };
 };

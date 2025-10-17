@@ -27,6 +27,12 @@ int main() {
 	std::cerr << "in " << xBlock << "x" << yBlock << " blocks" << std::endl;
 	int numPixels = nx * ny;
 
+	CameraOrientation orientation;
+	orientation.lookFrom = glm::vec3(0.0f, 0.0f, 1.0f);
+	orientation.lookAt = glm::vec3(0.0f, 0.0f, 0.0f);
+	orientation.vUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	Camera h_camera(orientation, 90.0f, (float)nx / (float)ny);
+
 	auto fb = std::make_unique<glm::vec3[]>(numPixels);
 	const auto startTime = std::chrono::steady_clock::now();
 	launchRenderer(fb.get(), nx, ny, xBlock, yBlock);
@@ -53,5 +59,6 @@ int main() {
 	wind.show();
 	wind.processInputLoop();
 
+	cudaDeviceReset();
 	return 0;
 }

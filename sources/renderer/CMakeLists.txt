@@ -1,7 +1,7 @@
 set(CMAKE_CXX_STANDARD 23)
 add_library(Renderer renderer.cpp renderer.h)
 
-target_link_libraries(Renderer PRIVATE glm)
+target_link_libraries(Renderer PRIVATE CUDA::cudart CUDA::cuda_driver glm)
 
 add_compile_definitions(SOURCE_ROOT="${CMAKE_SOURCE_DIR}")
 

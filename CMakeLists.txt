@@ -43,6 +43,7 @@ add_subdirectory(sources/material)
 add_subdirectory(sources/scattering_record)
 add_subdirectory(sources/window)
 add_subdirectory(sources/cudaray)
+add_subdirectory(sources/framebuffer)
 
 add_compile_definitions(SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
 

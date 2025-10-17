@@ -2,6 +2,7 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <iostream>
 #include <random>
 #include <curand_kernel.h>
 #include <utility>
@@ -13,7 +14,18 @@
 #include <glm/glm.hpp>
 
 #define INF cuda::std::numeric_limits<float>::max()
+#define checkCudaErrors(val) checkCuda( (val), #val, __FILE__, __LINE__ )
 
+
+void checkCuda(cudaError_t result, char const* const func, const char* const file, int const line) {
+	if (result) {
+		std::cerr << "CUDA error = " << static_cast<unsigned int>(result) << " at " <<
+			file << ":" << line << " '" << func << "' \n";
+		// Make sure we call CUDA Device Reset before exiting
+		cudaDeviceReset();
+		exit(99);
+	}
+}
 
 namespace utils {
 	namespace random {

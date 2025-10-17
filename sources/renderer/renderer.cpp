@@ -116,3 +116,44 @@ int MT_WindowRenderer::render(Camera& camera) {
 	pxBufToGDI(imgWidth, imgHeight);
 	return 0;
 }
+
+void CudaRenderer::initRenderer() {
+	int numPixels = imgWidth * imgHeight;
+	checkCudaErrors(cudaMalloc((void**)&d_camera, sizeof(Camera)));
+	checkCudaErrors(cudaMalloc((void**)&d_List, 2 * sizeof(Hittable*)));
+	checkCudaErrors(cudaMalloc((void**)&d_World, sizeof(HittableList)));
+	checkCudaErrors(cudaMalloc((void**)&d_randStates, numPixels * sizeof(curandState)));
+}
+
+CudaRenderer::~CudaRenderer() {
+	checkCudaErrors(cudaFree(d_List));
+	checkCudaErrors(cudaFree(d_World));
+	checkCudaErrors(cudaFree(d_randStates));
+	checkCudaErrors(cudaFree(d_camera));
+}
+
+int CudaRenderer::render(Camera& camera) {
+	int numPixels = imgWidth * imgHeight;
+	
+	checkCudaErrors(cudaMemcpy(d_camera, &camera, sizeof(Camera), cudaMemcpyHostToDevice));
+	initCamera<<<1, 1>>>(d_camera, imgWidth, imgHeight);
+	checkCudaErrors(cudaGetLastError());
+	checkCudaErrors(cudaDeviceSynchronize());
+
+	createWorld<<<1, 1>>>(d_List, d_World);
+	checkCudaErrors(cudaGetLastError());
+	checkCudaErrors(cudaDeviceSynchronize());
+
+	dim3 blocks(imgWidth / xBlock + 1, imgHeight / yBlock + 1);
+	dim3 threads(xBlock, yBlock);
+	utils::random::randomInit << <blocks, threads >> > (d_randStates, imgWidth, imgHeight);
+	checkCudaErrors(cudaGetLastError());
+	checkCudaErrors(cudaDeviceSynchronize());
+	renderScene<<<blocks, threads>>>(d_Fb, imgWidth, imgHeight, d_camera, d_World, d_randStates);
+
+	checkCudaErrors(cudaGetLastError());
+	checkCudaErrors(cudaDeviceSynchronize());
+	destroyWorld<<<1, 1>>>(d_List, d_World);
+	checkCudaErrors(cudaGetLastError());
+	checkCudaErrors(cudaMemcpy(fb.get(), d_Fb, numPixels * sizeof(glm::vec3), cudaMemcpyDeviceToHost));
+}
