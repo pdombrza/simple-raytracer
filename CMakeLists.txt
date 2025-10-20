@@ -37,7 +37,7 @@ add_subdirectory(sources/hitrec)
 add_subdirectory(sources/hittable)
 add_subdirectory(sources/hittablelist)
 add_subdirectory(sources/camera)
-# add_subdirectory(sources/renderer)
+add_subdirectory(sources/renderer)
 add_subdirectory(sources/utils)
 add_subdirectory(sources/material)
 add_subdirectory(sources/scattering_record)
@@ -66,6 +66,6 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${CUDAToolkit_INCLUDE_DIRS})
 
 
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Cudaray Ray Window)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Cudaray Ray Window Renderer)
 
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm)

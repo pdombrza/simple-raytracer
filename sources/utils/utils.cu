@@ -5,7 +5,7 @@ __global__ void utils::random::randomInit(curandState* randStates, int x, int y)
 	int j = threadIdx.y + blockIdx.y * blockDim.y;
 	if ((i >= x) || (j >= y)) return;
 	int pixelIdx = j * x + i;
-	curand_init(1984, pixelIdx, 0, &randStates[pixelIdx]); // literally brave new world
+	curand_init(1984 + pixelIdx, 0, 0, &randStates[pixelIdx]);
 }
 
 template<typename T>

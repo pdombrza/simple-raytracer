@@ -5,59 +5,64 @@
 
 #include <glm/glm.hpp>
 
-//#include "camera/camera.h"
-//#include "renderer/renderer.h"
+#include "camera/camera.h"
+#include "renderer/renderer.h"
 #include "hittable/hittable.h"
-//#include "hittablelist/hittablelist.h"
-//#include "material/material.h"
+#include "hittablelist/hittablelist.h"
+#include "material/material.h"
 #include "cudaray/cudaray.h"
 #include "window/window.h"
 #include "window/windinput.h"
 
 int main() {
-	int runtimeVersion = 0;
-	cudaRuntimeGetVersion(&runtimeVersion);
-	std::cout << "CUDA Runtime Version: "
-		<< runtimeVersion / 1000 << "." << (runtimeVersion % 1000) / 10 << "\n";
-	int nx = 1200;
-	int ny = 800;
-	int xBlock = 16;
-	int yBlock = 16;
-	std::cerr << "Rendering a " << nx << "x" << ny << " image " << std::endl;
-	std::cerr << "in " << xBlock << "x" << yBlock << " blocks" << std::endl;
-	int numPixels = nx * ny;
+	{
+		int runtimeVersion = 0;
+		cudaRuntimeGetVersion(&runtimeVersion);
+		std::cout << "CUDA Runtime Version: "
+			<< runtimeVersion / 1000 << "." << (runtimeVersion % 1000) / 10 << "\n";
+		int nx = 1200;
+		int ny = 800;
+		int xBlock = 16;
+		int yBlock = 16;
+		std::cerr << "Rendering a " << nx << "x" << ny << " image " << std::endl;
+		std::cerr << "in " << xBlock << "x" << yBlock << " blocks" << std::endl;
+		int numPixels = nx * ny;
 
-	CameraOrientation orientation;
-	orientation.lookFrom = glm::vec3(0.0f, 0.0f, 1.0f);
-	orientation.lookAt = glm::vec3(0.0f, 0.0f, 0.0f);
-	orientation.vUp = glm::vec3(0.0f, 1.0f, 0.0f);
-	Camera h_camera(orientation, 90.0f, (float)nx / (float)ny);
+		CameraOrientation orientation;
+		orientation.lookFrom = glm::vec3(0.0f, 0.0f, 1.0f);
+		orientation.lookAt = glm::vec3(0.0f, 0.0f, 0.0f);
+		orientation.vUp = glm::vec3(0.0f, 1.0f, 0.0f);
+		Camera h_camera(orientation, 90.0f, (float)nx / (float)ny);
 
-	auto fb = std::make_unique<glm::vec3[]>(numPixels);
-	const auto startTime = std::chrono::steady_clock::now();
-	launchRenderer(fb.get(), nx, ny, xBlock, yBlock);
+		HittableList scene{};
+		CudaRenderer renderer(&scene, nx, ny);
 
-	const auto endTime = std::chrono::steady_clock::now();
-	const std::chrono::duration<double> renderTime = endTime - startTime;
-	std::cout << "Render time: " << renderTime << std::endl;
+		const auto startTime = std::chrono::steady_clock::now();
+		renderer.render(h_camera);
+		const auto endTime = std::chrono::steady_clock::now();
+		const std::chrono::duration<double> renderTime = endTime - startTime;
+		std::cout << "Render time: " << renderTime << std::endl;
+		auto fb = renderer.getHostPixels();
 
-	auto pxDataGDI = std::make_shared<uint8_t[]>(nx * ny * 4);
-	for (int y = 0; y < ny; ++y) {
-		for (int x = 0; x < nx; ++x) {
-			glm::vec3 color = fb[y * nx + x];
-			color = glm::clamp(color, 0.0f, 1.0f);
-			int index = (y * nx + x) * 4;
-			pxDataGDI[index + 0] = static_cast<uint8_t>(color.b * 255.0f);
-			pxDataGDI[index + 1] = static_cast<uint8_t>(color.g * 255.0f);
-			pxDataGDI[index + 2] = static_cast<uint8_t>(color.r * 255.0f);
-			pxDataGDI[index + 3] = 255;
+
+		auto pxDataGDI = std::make_shared<uint8_t[]>(nx * ny * 4);
+		for (int y = 0; y < ny; ++y) {
+			for (int x = 0; x < nx; ++x) {
+				glm::vec3 color = fb[y * nx + x];
+				color = glm::clamp(color, 0.0f, 1.0f);
+				int index = (y * nx + x) * 4;
+				pxDataGDI[index + 0] = static_cast<uint8_t>(color.b * 255.0f);
+				pxDataGDI[index + 1] = static_cast<uint8_t>(color.g * 255.0f);
+				pxDataGDI[index + 2] = static_cast<uint8_t>(color.r * 255.0f);
+				pxDataGDI[index + 3] = 255;
+			}
 		}
-	}
 
-	Window wind("RT", nx, ny);
-	wind.setWindowData(pxDataGDI);
-	wind.show();
-	wind.processInputLoop();
+		Window wind("RT", nx, ny);
+		wind.setWindowData(pxDataGDI);
+		wind.show();
+		wind.processInputLoop();
+	}
 
 	cudaDeviceReset();
 	return 0;

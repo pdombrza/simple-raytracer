@@ -1,43 +1,21 @@
 #include "framebuffer.h"
 
-
-Framebuffer::Framebuffer(Framebuffer&& other) noexcept
-	: width(other.width), height(other.height), d_Fb(other.d_Fb) {
-	other.d_Fb = nullptr;
-	other.width = 0;
-	other.height = 0;
-}
-
-Framebuffer & Framebuffer::operator=(Framebuffer&& other) noexcept {
-	if (this != &other) {
-		cleanup();
-		width = other.width;
-		height = other.height;
-		d_Fb = other.d_Fb;
-		other.d_Fb = nullptr;
-		other.width = 0;
-		other.height = 0;
-	}
-	return *this;
-}
-
-
 __host__ void Framebuffer::initialize() {
 	size_t fbSize = width * height * sizeof(glm::vec3);
-	if (d_Fb) checkCudaErrors(cudaFree(d_Fb));
-	checkCudaErrors(cudaMalloc((void**)&d_Fb, fbSize));
+	if (pixels) checkCudaErrors(cudaFree(pixels));
+	checkCudaErrors(cudaMalloc((void**)&pixels, fbSize));
 }
 
 __host__ void Framebuffer::cleanup() {
-	if (d_Fb) {
-		checkCudaErrors(cudaFree(d_Fb));
-		d_Fb = nullptr;
+	if (pixels) {
+		checkCudaErrors(cudaFree(pixels));
+		pixels = nullptr;
 	}
 }
 
 __device__ void Framebuffer::writePixel(int x, int y, const glm::vec3& color) {
 	int index = y * width + x;
-	d_Fb[index] = color;
+	pixels[index] = color;
 }
 
 __device__ glm::vec3 Framebuffer::color(const Ray& ray, HittableList* world, utils::random::RNG& rng) {
@@ -72,4 +50,11 @@ __device__ glm::vec3 Framebuffer::colorPixel(int i, int j, int nx, int ny, Camer
 	col /= float(100);
 	col = glm::sqrt(col); // gamma correction
 	return col;
+}
+
+__host__ std::shared_ptr<glm::vec3[]> Framebuffer::getHostPixels() const {
+	size_t fbSize = width * height * sizeof(glm::vec3);
+	std::shared_ptr<glm::vec3[]> hostPixels(new glm::vec3[width * height]);
+	checkCudaErrors(cudaMemcpy(hostPixels.get(), pixels, fbSize, cudaMemcpyDeviceToHost));
+	return hostPixels;
 }

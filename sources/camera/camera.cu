@@ -35,7 +35,7 @@ __device__ Ray Camera::getRay(float u, float v, utils::random::RNG& rng) const {
 	return Ray(rayOrigin, rayDirection);
 }
 
-glm::vec3 Camera::defocusDiskSample(utils::random::RNG& rng) const {
+__device__ glm::vec3 Camera::defocusDiskSample(utils::random::RNG& rng) const {
 	glm::vec3 p = rng.randomVec3InDisk();
 	return center + p.x * defocusDiskU + p.y * defocusDiskV;
 }
