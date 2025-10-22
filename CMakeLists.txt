@@ -42,7 +42,7 @@ add_subdirectory(sources/utils)
 add_subdirectory(sources/material)
 add_subdirectory(sources/scattering_record)
 add_subdirectory(sources/window)
-add_subdirectory(sources/cudaray)
+add_subdirectory(sources/kernel)
 add_subdirectory(sources/framebuffer)
 
 add_compile_definitions(SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
@@ -66,6 +66,6 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${CUDAToolkit_INCLUDE_DIRS})
 
 
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Cudaray Ray Window Renderer)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Kernel Ray Window Renderer)
 
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm)

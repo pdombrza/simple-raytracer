@@ -18,7 +18,7 @@
 #include "camera/camera.h"
 #include "tobmp/tobmp.h"
 #include "color/color.h"
-#include "cudaray/cudaray.h"
+#include "kernel/kernel.h"
 
 
 class IRenderer {

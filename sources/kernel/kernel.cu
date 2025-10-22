@@ -1,4 +1,4 @@
-#include "cudaray.h"
+#include "kernel.h"
 
 __global__ void renderScene(Framebuffer* d_Fb, Camera* camera, HittableList* world, curandState *randState) {
 	int x = d_Fb->getWidth();

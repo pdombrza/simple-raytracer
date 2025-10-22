@@ -21,7 +21,7 @@ __device__ void Framebuffer::writePixel(int x, int y, const glm::vec3& color) {
 __device__ glm::vec3 Framebuffer::color(const Ray& ray, HittableList* world, utils::random::RNG& rng) {
 	Ray currentRay = ray;
 	float attenuation = 1.0f;
-	for (int i = 0; i < 100; i++) { // depth = 50
+	for (int i = 0; i < 50; i++) { // depth = 50
 		HitScatterRecord HSRec = world->hit(currentRay, 0.001f, INF, rng);
 		if (HSRec.hitRec.has_value()) {
 			HitRecord hitrec = HSRec.hitRec.value();

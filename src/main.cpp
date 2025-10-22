@@ -10,7 +10,7 @@
 #include "hittable/hittable.h"
 #include "hittablelist/hittablelist.h"
 #include "material/material.h"
-#include "cudaray/cudaray.h"
+#include "kernel/kernel.h"
 #include "window/window.h"
 #include "window/windinput.h"
 
