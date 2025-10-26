@@ -1,19 +1,21 @@
 #pragma once
-
+// stl
 #include <algorithm>
-#include <optional>
 #include <cmath>
 #include <memory>
 #include <utility>
+// external libs
+#include <cuda/std/optional>
+#include <cuda_runtime.h>
 #include <glm/glm.hpp>
-#include "ray.h"
-#include "hitrec.h"
-#include "utils.h"
-#include "material.h"
+// my libs
+#include "ray/ray.h"
+#include "hitrec/hitrec.h"
+#include "material/material.h"
 
 
 template<typename T>
-int sign(T val) {
+__host__ __device__ int sign(T val) {
 	auto sign = (T(0) < val) - (T(0) > val);
 	return sign;
 }
@@ -23,26 +25,26 @@ class Hittable {
 protected:
 	glm::vec3 center{};
 public:
-	virtual ~Hittable() = default;
-	virtual std::optional<HitRecord> hit(const Ray& ray, float rayTMin, float rayTMax) const = 0;
-	virtual HitRecord constructHitRecord(const Ray& ray, float t) const = 0;
-	virtual std::shared_ptr<Material> getMaterial() const = 0;
-	virtual void setMaterial(std::shared_ptr<Material> mat) = 0;
-	virtual glm::vec3 getCenter() const = 0;
+	__device__ virtual ~Hittable() = default;
+	__device__ virtual cuda::std::optional<HitRecord> hit(const Ray& ray, float rayTMin, float rayTMax) const = 0;
+	__device__ virtual HitRecord constructHitRecord(const Ray& ray, float t) const = 0;
+	__device__ virtual Material* getMaterial() const = 0;
+	__device__ virtual void setMaterial(Material* mat) = 0;
+	__device__ virtual glm::vec3 getCenter() const = 0;
 };
 
 
 class Sphere : public Hittable {
 protected:
-	std::shared_ptr<Material> material{};
+	Material* material = nullptr;
 	glm::vec3 center{};
 	float radius{};
 public:
-	~Sphere() = default;
-	explicit Sphere(const glm::vec3& center, float radius, std::shared_ptr<Material> mat) : Hittable(), center(center), radius(std::max(0.0f, radius)), material(mat) {};
-	virtual std::optional<HitRecord> hit(const Ray& ray, float rayTMin, float rayTMax) const override;
-	virtual HitRecord constructHitRecord(const Ray& ray, float t) const override;
-	virtual void setMaterial(std::shared_ptr<Material> mat) override;
-	virtual std::shared_ptr<Material> getMaterial() const override;
-	virtual glm::vec3 getCenter() const override;
+	__device__ ~Sphere() = default;
+	__device__ explicit Sphere(const glm::vec3& center, float radius, Material* mat) : Hittable(), center(center), radius(fmaxf(0.0f, radius)), material(mat) {};
+	__device__ virtual cuda::std::optional<HitRecord> hit(const Ray& ray, float rayTMin, float rayTMax) const override;
+	__device__ virtual HitRecord constructHitRecord(const Ray& ray, float t) const override;
+	__device__ virtual void setMaterial(Material* mat) override;
+	__device__ virtual Material* getMaterial() const override;
+	__device__ virtual glm::vec3 getCenter() const override;
 };

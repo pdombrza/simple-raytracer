@@ -1,10 +1,10 @@
 #pragma once
 
 #include <memory>
-#include <glm/glm.hpp>
-#include "ray.h"
-#include "utils.h"
-#include "scattering_record.h"
+#include <cuda_runtime.h>
+#include <cuda/std/optional>
+#include "ray/ray.h"
+#include "scattering_record/scattering_record.h"
 
 
 struct HitRecord {
@@ -13,15 +13,16 @@ struct HitRecord {
 	float t;
 	bool frontFace;
 
-	void setFaceNormal(const Ray& ray, const glm::vec3& outwardNormal) {
+	__device__ void setFaceNormal(const Ray& ray, const glm::vec3& outwardNormal) {
 		// outwardNormal is supposed to be normalized
 		frontFace = glm::dot(ray.getDirection(), outwardNormal) < 0;
-		normal = frontFace ? outwardNormal : -outwardNormal;
+		normal = frontFace ? outwardNormal : outwardNormal * -1.0f;
+		return;
 	}
 };
 
 
 struct HitScatterRecord {
-	std::optional<HitRecord> hitRec = std::nullopt;
-	std::optional<ScatteringRecord> scatterRec = std::nullopt;
+	cuda::std::optional<HitRecord> hitRec = cuda::std::nullopt;
+	cuda::std::optional<ScatteringRecord> scatterRec = cuda::std::nullopt;
 };

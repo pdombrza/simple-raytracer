@@ -1,11 +1,12 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <cuda_runtime.h>
 
-#include "hittable.h"
-#include "hitrec.h"
-#include "ray.h"
-#include "utils.h"
+#include "hittable/hittable.h"
+#include "hitrec/hitrec.h"
+#include "ray/ray.h"
+#include "utils/utils.h"
 
 
 struct CameraOrientation {
@@ -30,30 +31,30 @@ private:
 	glm::vec3 defocusDiskV{};
 	CameraOrientation orientation{};
 public:
-	Camera() {};
-	Camera(CameraOrientation orientation) : orientation(orientation) {};
-	Camera(float aspectRatio) : aspectRatio(aspectRatio) {};
+	__host__ __device__ Camera() {};
+	__host__ __device__ Camera(CameraOrientation orientation) : orientation(orientation) {};
+	__host__ __device__ Camera(float aspectRatio) : aspectRatio(aspectRatio) {};
 	//Camera(float vFov) : vFov(vFov) {};
-	Camera(float vFov, float aspectRatio) : vFov(vFov), aspectRatio(aspectRatio) {};
-	Camera(CameraOrientation orientation, float vFov, float aspectRatio) : orientation(orientation), vFov(vFov), aspectRatio(aspectRatio) {};
-	Camera(float aspectRatio, float focalLength, float viewportHeight, const glm::vec3& center) : aspectRatio(aspectRatio), center(center) {};
-	~Camera() = default;
-	void initialize(int imgWidth, int imgHeight);
-	glm::vec3 defocusDiskSample() const;
-	Ray getRay(float h, float w) const;
-	void setAspectRatio(float newAspectRatio) { aspectRatio = newAspectRatio; };
-	float getAspectRatio() const { return aspectRatio; };
-	void setCenter(glm::vec3& newCameraCenter) { center = newCameraCenter; };
-	float getVFov() const { return vFov; };
-	void setVFov(float newVFov) { vFov = newVFov; };
-	CameraOrientation getCameraOrientation() const { return orientation; };
-	void setCameraOrientation(CameraOrientation& newOrientation) { orientation = newOrientation; };
-	glm::vec3 getCenter() const { return center; };
-	glm::vec3 getStartPixelLoc() const { return startPixelLoc; };
-	glm::vec3 getPixelDeltaU() const { return pixelDeltaU; };
-	glm::vec3 getPixelDeltaV() const { return pixelDeltaV; };
-	float getDefocusAngle() const { return defocusAngle; };
-	void setDefocusAngle(float newDefocusAngle) { defocusAngle = newDefocusAngle; };
-	float getFocusDist() const { return focusDist; };
-	void setFocusDist(float newFocusDist) { focusDist = newFocusDist; };
+	__host__ __device__ Camera(float vFov, float aspectRatio) : vFov(vFov), aspectRatio(aspectRatio) {};
+	__host__ __device__ Camera(CameraOrientation orientation, float vFov, float aspectRatio) : orientation(orientation), vFov(vFov), aspectRatio(aspectRatio) {};
+	__host__ __device__ Camera(float aspectRatio, float focalLength, float viewportHeight, const glm::vec3& center) : aspectRatio(aspectRatio), center(center) {};
+	__host__ __device__ ~Camera() = default;
+	__device__ void initialize(int imgWidth, int imgHeight);
+	__device__ glm::vec3 defocusDiskSample(utils::random::RNG& rng) const;
+	__device__ Ray getRay(float h, float w, utils::random::RNG& rng) const;
+	__device__ void setAspectRatio(float newAspectRatio) { aspectRatio = newAspectRatio; };
+	__device__ float getAspectRatio() const { return aspectRatio; };
+	__device__ void setCenter(glm::vec3& newCameraCenter) { center = newCameraCenter; };
+	__device__ float getVFov() const { return vFov; };
+	__device__ void setVFov(float newVFov) { vFov = newVFov; };
+	__device__ CameraOrientation getCameraOrientation() const { return orientation; };
+	__device__ void setCameraOrientation(CameraOrientation& newOrientation) { orientation = newOrientation; };
+	__device__ glm::vec3 getCenter() const { return center; };
+	__device__ glm::vec3 getStartPixelLoc() const { return startPixelLoc; };
+	__device__ glm::vec3 getPixelDeltaU() const { return pixelDeltaU; };
+	__device__ glm::vec3 getPixelDeltaV() const { return pixelDeltaV; };
+	__device__ float getDefocusAngle() const { return defocusAngle; };
+	__device__ void setDefocusAngle(float newDefocusAngle) { defocusAngle = newDefocusAngle; };
+	__device__ float getFocusDist() const { return focusDist; };
+	__device__ void setFocusDist(float newFocusDist) { focusDist = newFocusDist; };
 };

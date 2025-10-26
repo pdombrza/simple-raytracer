@@ -1,12 +1,7 @@
 set(CMAKE_CXX_STANDARD 23)
-add_library(HittableList hittablelist.cpp hittablelist.h)
+add_library(HittableList hittablelist.cu hittablelist.h)
 
-target_link_libraries(HittableList PRIVATE glm)
+target_link_libraries(HittableList PRIVATE CUDA::cudart CUDA::cuda_driver glm)
 
 target_include_directories(HittableList PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_include_directories(HittableList PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../ray")
-target_include_directories(HittableList PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../hitrec")
-target_include_directories(HittableList PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../hittable")
-target_include_directories(HittableList PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../scattering_record")
-target_include_directories(HittableList PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../utils")
-target_include_directories(HittableList PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../material")
+target_include_directories(HittableList PUBLIC ${PROJECT_SOURCE_DIR}/sources)

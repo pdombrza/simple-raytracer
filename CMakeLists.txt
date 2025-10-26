@@ -1,21 +1,37 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(CMAKE_MSVC_RUNTIME_LIBRARY "$<$<CONFIG:Debug>:MultiThreadedDebug>$<$<CONFIG:Release>:MultiThreaded>")
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:>")
 
 
-project(raytracer)
+project(raytracer LANGUAGES CXX CUDA)
 
+add_executable("${CMAKE_PROJECT_NAME}")
+
+set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 20)
+set(CMAKE_CUDA_STANDARD 20)
+set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
+# glm
 add_subdirectory(thirdparty/glm)
 
+# CUDA 
+find_package(CUDAToolkit REQUIRED)
+
+include(CheckLanguage)
+check_language(CUDA)
+if(CMAKE_CUDA_COMPILER)	
+	enable_language(CUDA)
+	find_package(CUDAToolkit)
+else()
+	message(STATUS "No CUDA compiler found")
+endif()
 
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-
 
 file(GLOB_RECURSE MODULE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/sources/*")
 
 # here add subdirectory created in your module
-add_subdirectory(sources/color)
-add_subdirectory(sources/tobmp)
+# add_subdirectory(sources/color)
+# add_subdirectory(sources/tobmp)
 add_subdirectory(sources/ray)
 add_subdirectory(sources/hitrec)
 add_subdirectory(sources/hittable)
@@ -26,23 +42,30 @@ add_subdirectory(sources/utils)
 add_subdirectory(sources/material)
 add_subdirectory(sources/scattering_record)
 add_subdirectory(sources/window)
+add_subdirectory(sources/kernel)
+add_subdirectory(sources/framebuffer)
 
-add_executable("${CMAKE_PROJECT_NAME}")
 add_compile_definitions(SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
-
-set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 20)
 
 target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES} )
 
-
 if(MSVC) # Microsoft Visual Studio
 	target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC _CRT_SECURE_NO_WARNINGS)
-	set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY MSVC_RUNTIME_LIBRARY "$<$<CONFIG:Debug>:MultiThreadedDebug>$<$<CONFIG:Release>:MultiThreaded>")
-
 endif()
 
-target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+# CUDA
+set(GENCODE_FLAGS "-gencode arch=compute_120,code=sm_120")
+set (CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -lineinfo")
 
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Color Tobmp Ray HitRecord Hittable HittableList Camera Renderer Utils Material ScatteringRecord Window)
+target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
+    $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CUDA>:-G -lineinfo>>
+    $<$<CONFIG:Release>:$<$<COMPILE_LANGUAGE:CUDA>:-O3 -lineinfo ${GENCODE_FLAGS}>>
+)
+
+target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${CUDAToolkit_INCLUDE_DIRS})
+
+
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Kernel Ray Window Renderer)
 
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm)
