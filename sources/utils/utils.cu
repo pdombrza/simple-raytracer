@@ -8,23 +8,12 @@ __global__ void utils::random::randomInit(curandState* randStates, int x, int y)
 	curand_init(1984 + pixelIdx, 0, 0, &randStates[pixelIdx]);
 }
 
-template<typename T>
-__device__ T utils::random::RNG::getRandom(T min, T max) {
-	float generatedRandom = curand_uniform(state);
-	return static_cast<float>(min) + (static_cast<float>(max) - static_cast<float>(min)) * generatedRandom;
-}
-
 __device__ float utils::random::RNG::getRandomUniform() {
 	return curand_uniform(state);
 }
 
 __device__ glm::vec3 utils::random::RNG::sampleSquare() {
 	return glm::vec3(curand_uniform(state) - 0.5f, curand_uniform(state) - 0.5f, 0.0f);
-}
-
-template<typename T> // this template now becomes useless since randoms will always be float
-__device__ glm::vec<3, T, glm::defaultp> utils::random::RNG::randomVec3(T min, T max) {
-	return glm::vec<3, T, glm::defaultp>(getRandom(min, max), getRandom(min, max), getRandom(min, max));
 }
 
 __device__ glm::vec3 utils::random::RNG::randomVec3Norm() {

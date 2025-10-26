@@ -36,11 +36,16 @@ namespace utils {
 			__device__ explicit RNG(curandState* state) : state(state) {};
 			__device__ ~RNG() = default;
 			template<typename T>
-			__device__ T getRandom(T min, T max);
+			__device__ T getRandom(T min, T max) {
+				float generatedRandom = curand_uniform(state);
+				return static_cast<float>(min) + (static_cast<float>(max) - static_cast<float>(min)) * generatedRandom;
+			};
 			__device__ float getRandomUniform();
 			__device__ glm::vec3 sampleSquare();
 			template<typename T>
-			__device__ glm::vec<3, T, glm::defaultp> randomVec3(T min, T max);
+			__device__ glm::vec<3, T, glm::defaultp> randomVec3(T min, T max) {
+				return glm::vec<3, T, glm::defaultp>(getRandom(min, max), getRandom(min, max), getRandom(min, max));
+			};
 			__device__ glm::vec3 randomVec3Norm();
 			__device__ glm::vec3 randomVec3InSphere();
 			__device__ glm::vec3 randomVec3OnHemisphere(const glm::vec3& normal);

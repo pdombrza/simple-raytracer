@@ -20,8 +20,8 @@ int main() {
 		cudaRuntimeGetVersion(&runtimeVersion);
 		std::cout << "CUDA Runtime Version: "
 			<< runtimeVersion / 1000 << "." << (runtimeVersion % 1000) / 10 << "\n";
-		int nx = 1200;
-		int ny = 800;
+		int nx = 800;
+		int ny = 450;
 		int xBlock = 16;
 		int yBlock = 16;
 		std::cerr << "Rendering a " << nx << "x" << ny << " image " << std::endl;
@@ -29,10 +29,13 @@ int main() {
 		int numPixels = nx * ny;
 
 		CameraOrientation orientation;
-		orientation.lookFrom = glm::vec3(0.0f, 0.0f, 1.0f);
+		orientation.lookFrom = glm::vec3(13.0f, 2.0f, 3.0f);
 		orientation.lookAt = glm::vec3(0.0f, 0.0f, 0.0f);
 		orientation.vUp = glm::vec3(0.0f, 1.0f, 0.0f);
 		Camera h_camera(orientation, 90.0f, (float)nx / (float)ny);
+		h_camera.setVFov(20.0f);
+		h_camera.setDefocusAngle(0.6f);
+		h_camera.setFocusDist(10.0f);
 
 		HittableList scene{};
 		CudaRenderer renderer(&scene, nx, ny);
