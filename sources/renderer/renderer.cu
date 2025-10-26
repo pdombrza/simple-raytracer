@@ -6,7 +6,7 @@ void CudaRenderer::initRenderer() {
 	checkCudaErrors(cudaMalloc((void**)&d_Fb, sizeof(Framebuffer)));
 	checkCudaErrors(cudaMemcpy(d_Fb, &h_Fb, sizeof(Framebuffer), cudaMemcpyHostToDevice));
 	checkCudaErrors(cudaMalloc((void**)&d_camera, sizeof(Camera)));
-	checkCudaErrors(cudaMalloc((void**)&d_List, 2 * sizeof(Hittable*)));
+	checkCudaErrors(cudaMalloc((void**)&d_List, 5 * sizeof(Hittable*)));
 	checkCudaErrors(cudaMalloc((void**)&d_World, sizeof(HittableList)));
 	checkCudaErrors(cudaMalloc((void**)&d_randStates, numPixels * sizeof(curandState)));
 }

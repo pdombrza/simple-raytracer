@@ -20,14 +20,16 @@ __device__ void Framebuffer::writePixel(int x, int y, const glm::vec3& color) {
 
 __device__ glm::vec3 Framebuffer::color(const Ray& ray, HittableList* world, utils::random::RNG& rng) {
 	Ray currentRay = ray;
-	float attenuation = 1.0f;
+	glm::vec3 attenuation(1.0f, 1.0f, 1.0f);
 	for (int i = 0; i < 50; i++) { // depth = 50
 		HitScatterRecord HSRec = world->hit(currentRay, 0.001f, INF, rng);
 		if (HSRec.hitRec.has_value()) {
 			HitRecord hitrec = HSRec.hitRec.value();
-			glm::vec3 target = hitrec.p + hitrec.normal + rng.randomVec3InSphere();
-			attenuation *= 0.5f;
-			currentRay = Ray(hitrec.p, target - hitrec.p);
+			if (HSRec.scatterRec.has_value()) {
+				ScatteringRecord scRec = HSRec.scatterRec.value();
+				attenuation *= scRec.attenuation;
+				currentRay = scRec.ray;
+			}
 		}
 		else {
 			glm::vec3 direction = glm::normalize(currentRay.getDirection());
@@ -48,7 +50,9 @@ __device__ glm::vec3 Framebuffer::colorPixel(int i, int j, int nx, int ny, Camer
 	}
 
 	col /= float(100);
-	col = glm::sqrt(col); // gamma correction
+	col[0] = sqrtf(col[0]);
+	col[1] = sqrtf(col[1]);
+	col[2] = sqrtf(col[2]);
 	return col;
 }
 

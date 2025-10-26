@@ -20,19 +20,22 @@ __global__ void initCamera(Camera* cam, int width, int height) {
 
 __global__ void createWorld(Hittable** d_List, HittableList* d_World) {
 	if (threadIdx.x == 0 && blockIdx.x == 0) {
-		d_List[0] = new Sphere(glm::vec3(0.0f, -100.5f, -1.0f), 100.0f, new Lambertian(glm::vec3(0.5f, 0.5f, 0.5f)));
-		d_List[1] = new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f, new Lambertian(glm::vec3(0.5f, 0.5f, 0.5f)));
-		new(d_World) HittableList(d_List, 2, 2);
+		d_List[0] = new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f, new Lambertian(glm::vec3(0.1f, 0.2f, 0.5f)));
+		d_List[1] = new Sphere(glm::vec3(0.0f, -100.5f, -1.0f), 100.0f, new Lambertian(glm::vec3(0.8f, 0.8f, 0.0f)));
+		d_List[2] = new Sphere(glm::vec3(1.0f, 0.0f, -1.0f), 0.5, new Metal(glm::vec3(0.8f, 0.6f, 0.2f), 0.5f));
+		d_List[3] = new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.5, new Dielectric(1.5f));
+		d_List[4] = new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.45, new Dielectric(1.0f / 1.5f));
+		new(d_World) HittableList(d_List, 5, 5);
 	}
 }
 
 __global__ void destroyWorld(Hittable** d_List, HittableList* d_World, int size) {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
-        delete d_List[0]->getMaterial();
-        delete d_List[1]->getMaterial();
-
-        delete d_List[0];
-        delete d_List[1];
+        for (int i = 0; i < 5; i++) {
+			Material* mat = d_List[i]->getMaterial();
+			delete mat;
+			delete d_List[i];
+		}
 
 		delete d_World;
     }
