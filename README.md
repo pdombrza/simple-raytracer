@@ -1,13 +1,9 @@
-### Simple raytracer
-Based on the raytracing in a weekend [article](https://raytracing.github.io/books/RayTracingInOneWeekend.html). The program draws a simple scene to a BMP file.
-
-### Purpose of the repository
-* I was interested in graphics programming, and though it would be a small and relatively simple introductory project.
-* I also wanted to improve my knowledge of C++ - i tried to use some of the newer C++ features.
+### Simple CUDA raytracer
+Based on the [raytracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html) and [this nvidia blogpost](https://developer.nvidia.com/blog/accelerated-ray-tracing-cuda/). The program draws a simple scene to a WinAPI window.
 
 ### Build the project
-* You can open the project in Visual Studio, then build and run with `ctrl+f5`
-* You can also build it with cmake (in release or debug mode):
+* Open the project in Visual Studio, then build and run with `ctrl+f5`
+* Build using CMake (in release or debug mode):
 ```
 cmake -S . -B out -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
 cmake --build out --config Release
@@ -21,17 +17,21 @@ cmake --build out --config Debug
 ```
 
 ### Dependencies
-This project uses glm for vector operations. The code for glm is directly in the repository (thirdparty directory).
+* glm
+* cuda toolkit
 
-### The future
-Stuff i may want to add in the future:
+### TODO
 * multithreading - done
 * Render to window instead of a bitmap file - done
-* CUDA
+* CUDA - done
+* OpenGL window instead of WinAPI
+* BHV acceleration
+* polygon meshes 
+* other optimizations 
 * light sources
-* textures
-* objects different than spheres
+* textures 
+* optix
 
 ### The final render
-![render so far](output.bmp)
+![render so far](renders/output.png)
 
