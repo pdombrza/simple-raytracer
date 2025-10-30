@@ -12,6 +12,8 @@ set(CMAKE_CUDA_STANDARD 20)
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 # glm
 add_subdirectory(thirdparty/glm)
+add_subdirectory(thirdparty/glfw)
+add_subdirectory(thirdparty/glad)
 
 # CUDA 
 find_package(CUDAToolkit REQUIRED)
@@ -68,4 +70,4 @@ target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${CUDAToolkit_INCLUDE_DI
 
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Kernel Ray Window Renderer)
 
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm glfw glad)

@@ -4,6 +4,8 @@
 #include <cuda_runtime.h>
 
 #include <glm/glm.hpp>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 #include "camera/camera.h"
 #include "renderer/renderer.h"
@@ -14,18 +16,61 @@
 #include "window/window.h"
 #include "window/windinput.h"
 
+void processInput(GLFWwindow* window);
+
 int main() {
 	{
 		int runtimeVersion = 0;
 		cudaRuntimeGetVersion(&runtimeVersion);
-		std::cout << "CUDA Runtime Version: "
+		if (!glfwInit()) {
+			std::cerr << "Failed to initialize GLFW" << std::endl;
+			return -1;
+		}
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		int width = 1200;
+		int height = 800;
+		GLFWwindow* window = glfwCreateWindow(width, height, "RT", NULL, NULL);
+		if (!window) {
+			std::cerr << "Failed to create GLFW window" << std::endl;
+			glfwTerminate();
+			return -1;
+		}
+
+		glfwMakeContextCurrent(window);
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		glfwSwapInterval(0); 
+
+		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+			std::cerr << "Failed to initialize GLAD" << std::endl;
+			glfwDestroyWindow(window);
+			glfwTerminate();
+			return -1;
+		}
+
+		glViewport(0, 0, width, height);
+		glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) -> void { glViewport(0, 0, width, height); });
+		while (!glfwWindowShouldClose(window)) {
+			processInput(window);
+			glClearColor(0.1f, 0.2f, 0.4f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
+			glfwSwapBuffers(window);
+			glfwPollEvents();
+		}
+	
+		glfwTerminate();
+
+		/*std::cout << "CUDA Runtime Version: "
 			<< runtimeVersion / 1000 << "." << (runtimeVersion % 1000) / 10 << "\n";
-		int nx = 800;
-		int ny = 450;
+		int nx = 1200;
+		int ny = 800;
 		int xBlock = 16;
 		int yBlock = 16;
 		std::cerr << "Rendering a " << nx << "x" << ny << " image " << std::endl;
-		std::cerr << "in " << xBlock << "x" << yBlock << " blocks" << std::endl;
+		std::cerr << "in " << xBlock << "x" << yBlock << " blocks" << std::Wendl;
 		int numPixels = nx * ny;
 
 		CameraOrientation orientation;
@@ -45,10 +90,11 @@ int main() {
 		const auto endTime = std::chrono::steady_clock::now();
 		const std::chrono::duration<double> renderTime = endTime - startTime;
 		std::cout << "Render time: " << renderTime << std::endl;
-		auto fb = renderer.getHostPixels();
+		auto fb = renderer.getHostPixels();*/
 
 
-		auto pxDataGDI = std::make_shared<uint8_t[]>(nx * ny * 4);
+
+		/*auto pxDataGDI = std::make_shared<uint8_t[]>(nx * ny * 4);
 		for (int y = 0; y < ny; ++y) {
 			for (int x = 0; x < nx; ++x) {
 				glm::vec3 color = fb[y * nx + x];
@@ -64,9 +110,15 @@ int main() {
 		Window wind("RT", nx, ny);
 		wind.setWindowData(pxDataGDI);
 		wind.show();
-		wind.processInputLoop();
+		wind.processInputLoop();*/
+
 	}
 
-	cudaDeviceReset();
+	//cudaDeviceReset();
 	return 0;
+}
+
+void processInput(GLFWwindow* window) {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
 }
