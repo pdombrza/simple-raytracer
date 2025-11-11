@@ -1,6 +1,8 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <optional>
 #include <sstream>
 #include <iostream>
@@ -9,6 +11,7 @@
 #include <execution>
 
 #include <cuda_runtime.h>
+#include <cuda_gl_interop.h>
 
 #include "ray/ray.h"
 #include "hitrec/hitrec.h"
@@ -39,6 +42,7 @@ private:
 	curandState* d_randStates = nullptr;
 	Hittable** d_List_storage = nullptr;
 	HittableList* d_World_storage = nullptr;
+	cudaGraphicsResource* glResource = nullptr;
 protected:
 	HittableList* scene;
 	int imgWidth = 400;
@@ -64,6 +68,9 @@ public:
 	virtual int getImgWidth() const { return imgWidth; };
 	virtual void setImgHeight(int newImgHeight) { imgHeight = newImgHeight; };
 	virtual int getImgHeight() const { return imgHeight; };
+	void registerGLTexture(GLuint glTex);
+	virtual void setupScene(Camera& camera) const;
+	virtual void destroyScene() const;
 	virtual int render(Camera& camera) override;
 	std::shared_ptr<glm::vec3[]> getHostPixels() const { return h_Fb.getHostPixels(); };
 };

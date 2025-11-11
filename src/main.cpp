@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <cuda_gl_interop.h>
 
 #include "camera/camera.h"
 #include "renderer/renderer.h"
@@ -13,6 +14,7 @@
 #include "hittablelist/hittablelist.h"
 #include "material/material.h"
 #include "kernel/kernel.h"
+#include "shader/shader.h"
 #include "window/window.h"
 #include "window/windinput.h"
 
@@ -22,7 +24,9 @@ int main() {
 	{
 		int runtimeVersion = 0;
 		cudaRuntimeGetVersion(&runtimeVersion);
-		if (!glfwInit()) {
+		std::cout << "CUDA Runtime Version: " << runtimeVersion / 1000 << "." << (runtimeVersion % 1000) / 10 << "\n";
+
+		if (!glfwInit()) { // TODO: move OpenGL related code to Window class
 			std::cerr << "Failed to initialize GLFW" << std::endl;
 			return -1;
 		}
@@ -51,70 +55,100 @@ int main() {
 			return -1;
 		}
 
-		glViewport(0, 0, width, height);
-		glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) -> void { glViewport(0, 0, width, height); });
-		while (!glfwWindowShouldClose(window)) {
-			processInput(window);
-			glClearColor(0.1f, 0.2f, 0.4f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
-			glfwSwapBuffers(window);
-			glfwPollEvents();
-		}
-	
-		glfwTerminate();
+		Shader shader(SHADERS_PATH "vertex.vert.glsl", SHADERS_PATH "fragment.frag.glsl");
 
-		/*std::cout << "CUDA Runtime Version: "
-			<< runtimeVersion / 1000 << "." << (runtimeVersion % 1000) / 10 << "\n";
-		int nx = 1200;
-		int ny = 800;
+		float vertices[] = {
+			-1.f, -1.f,   0.f, 0.f,
+			 1.f, -1.f,   1.f, 0.f,
+			 1.f,  1.f,   1.f, 1.f,
+
+			-1.f, -1.f,   0.f, 0.f,
+			 1.f,  1.f,   1.f, 1.f,
+			-1.f,  1.f,   0.f, 1.f
+		};
+		unsigned int indices[] = {
+			0, 1, 2,
+			2, 3, 0
+		};
+
+		unsigned int VAO, VBO;
+
+		glGenVertexArrays(1, &VAO);
+		glGenBuffers(1, &VBO);
+
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+
+		GLuint PBO;
+		cudaGraphicsResource* cudaPBOResource;
+
+		glGenBuffers(1, &PBO);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, PBO);
+		glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * sizeof(uchar4), nullptr, GL_DYNAMIC_DRAW);
+		cudaGraphicsGLRegisterBuffer(&cudaPBOResource, PBO, cudaGraphicsMapFlagsWriteDiscard);
+
+		GLuint glTex;
+		glGenTextures(1, &glTex);
+		glBindTexture(GL_TEXTURE_2D, glTex);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+
 		int xBlock = 16;
 		int yBlock = 16;
-		std::cerr << "Rendering a " << nx << "x" << ny << " image " << std::endl;
-		std::cerr << "in " << xBlock << "x" << yBlock << " blocks" << std::Wendl;
-		int numPixels = nx * ny;
-
+		std::cerr << "Rendering a " << width << "x" << height << " image " << std::endl;
+		std::cerr << "in " << xBlock << "x" << yBlock << " blocks" << std::endl;
+		int numPixels = width * height;
+		
 		CameraOrientation orientation;
 		orientation.lookFrom = glm::vec3(13.0f, 2.0f, 3.0f);
 		orientation.lookAt = glm::vec3(0.0f, 0.0f, 0.0f);
 		orientation.vUp = glm::vec3(0.0f, 1.0f, 0.0f);
-		Camera h_camera(orientation, 90.0f, (float)nx / (float)ny);
+		Camera h_camera(orientation, 90.0f, (float)width / (float)height);
 		h_camera.setVFov(20.0f);
 		h_camera.setDefocusAngle(0.6f);
 		h_camera.setFocusDist(10.0f);
 
 		HittableList scene{};
-		CudaRenderer renderer(&scene, nx, ny);
 
-		const auto startTime = std::chrono::steady_clock::now();
-		renderer.render(h_camera);
-		const auto endTime = std::chrono::steady_clock::now();
-		const std::chrono::duration<double> renderTime = endTime - startTime;
-		std::cout << "Render time: " << renderTime << std::endl;
-		auto fb = renderer.getHostPixels();*/
+		CudaRenderer renderer(&scene, width, height);
+		renderer.registerGLTexture(glTex);
+		renderer.setupScene(h_camera);
+		shader.use();
 
+		glViewport(0, 0, width, height);
+		glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) -> void { glViewport(0, 0, width, height); });
+		renderer.render(h_camera); // Render once for now - too slow to do multiple frames
 
+		while (!glfwWindowShouldClose(window)) {
+			processInput(window);
 
-		/*auto pxDataGDI = std::make_shared<uint8_t[]>(nx * ny * 4);
-		for (int y = 0; y < ny; ++y) {
-			for (int x = 0; x < nx; ++x) {
-				glm::vec3 color = fb[y * nx + x];
-				color = glm::clamp(color, 0.0f, 1.0f);
-				int index = (y * nx + x) * 4;
-				pxDataGDI[index + 0] = static_cast<uint8_t>(color.b * 255.0f);
-				pxDataGDI[index + 1] = static_cast<uint8_t>(color.g * 255.0f);
-				pxDataGDI[index + 2] = static_cast<uint8_t>(color.r * 255.0f);
-				pxDataGDI[index + 3] = 255;
-			}
+			glClear(GL_COLOR_BUFFER_BIT);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, glTex);
+
+			glBindVertexArray(VAO);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+
+			glfwSwapBuffers(window);
+			glfwPollEvents();
 		}
 
-		Window wind("RT", nx, ny);
-		wind.setWindowData(pxDataGDI);
-		wind.show();
-		wind.processInputLoop();*/
-
+		renderer.destroyScene();
 	}
 
-	//cudaDeviceReset();
+	cudaDeviceReset();
+	glfwTerminate();
 	return 0;
 }
 

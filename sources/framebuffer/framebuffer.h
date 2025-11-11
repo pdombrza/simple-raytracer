@@ -13,7 +13,7 @@ class Framebuffer {
 private:
 	int width;
 	int height;
-	glm::vec3* pixels = nullptr;
+	float4* pixels = 0;
 
 public:
 	__host__ Framebuffer(int width, int height) : width(width), height(height) { initialize(); };
@@ -27,8 +27,9 @@ public:
 	__device__ void writePixel(int x, int y, const glm::vec3& color);
 	__device__ glm::vec3 color(const Ray& ray, HittableList* world, utils::random::RNG& rng);
 	__device__ glm::vec3 colorPixel(int i, int j, int nx, int ny, Camera* camera, HittableList* world, utils::random::RNG& rng);
-	__host__ __device__ glm::vec3* getPixels() const { return pixels; };
+	__host__ __device__ float4* getPixels() const { return pixels; };
 	__host__ __device__ int getWidth() const { return width; };
 	__host__ __device__ int getHeight() const { return height; };
+	__host__ __device__ void setPixels(float4* newPixels) { pixels = newPixels; };
 	__host__ std::shared_ptr<glm::vec3[]> getHostPixels() const;
 };

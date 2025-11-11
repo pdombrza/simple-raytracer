@@ -22,16 +22,20 @@ CudaRenderer::~CudaRenderer() {
 	d_camera = nullptr;
 	checkCudaErrors(cudaFree(d_randStates));
 	d_randStates = nullptr;
+	if (glResource) cudaGraphicsUnregisterResource(glResource); // TODO: consider decoupling gl from renderer - move to separate class
 }
 
-int CudaRenderer::render(Camera& camera) {
+void CudaRenderer::registerGLTexture(GLuint glTex) {
+	cudaGraphicsGLRegisterImage(&glResource, glTex, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsSurfaceLoadStore);
+}
+
+void CudaRenderer::setupScene(Camera& camera) const { // TODO: use this in constuctor
 	int numPixels = imgWidth * imgHeight;
-	
+
 	checkCudaErrors(cudaMemcpy(d_camera, &camera, sizeof(Camera), cudaMemcpyHostToDevice));
 	initCamera<<<1, 1>>>(d_camera, imgWidth, imgHeight);
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
-
 	dim3 blocks(imgWidth / xBlock + 1, imgHeight / yBlock + 1);
 	dim3 threads(xBlock, yBlock);
 	utils::random::randomInit<<<blocks, threads>>>(d_randStates, imgWidth, imgHeight);
@@ -41,13 +45,37 @@ int CudaRenderer::render(Camera& camera) {
 	createWorld<<<1, 1>>>(d_List, d_World, d_randStates);
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
+}
 
-	renderScene<<<blocks, threads>>>(d_Fb, d_camera, d_World, d_randStates);
+int CudaRenderer::render(Camera& camera) { // TODO: profile this
+	cudaSurfaceObject_t surfObj = 0;
+	if (glResource) {
+		cudaArray_t cuArray;
+		checkCudaErrors(cudaGraphicsMapResources(1, &glResource));
+		checkCudaErrors(cudaGraphicsSubResourceGetMappedArray(&cuArray, glResource, 0, 0));
+		cudaResourceDesc resDesc = {};
+		resDesc.resType = cudaResourceTypeArray;
+		resDesc.res.array.array = cuArray;
+		checkCudaErrors(cudaCreateSurfaceObject(&surfObj, &resDesc));
+	}
+
+	dim3 blocks(imgWidth / xBlock + 1, imgHeight / yBlock + 1);
+	dim3 threads(xBlock, yBlock);
+
+	renderScene<<<blocks, threads>>>(d_Fb, d_camera, d_World, d_randStates, surfObj);
 	checkCudaErrors(cudaGetLastError());
-	checkCudaErrors(cudaDeviceSynchronize());
+	//checkCudaErrors(cudaDeviceSynchronize());
 
+	if (glResource) {
+		checkCudaErrors(cudaDestroySurfaceObject(surfObj));
+		checkCudaErrors(cudaGraphicsUnmapResources(1, &glResource));
+	}
+
+	return 0;
+}
+
+void CudaRenderer::destroyScene() const {
 	destroyWorld<<<1, 1>>>(d_List, d_World, 12 * 12 + 1 + 3);
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
-	return 0;
 }

@@ -5,6 +5,11 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<CONFIG:
 
 project(raytracer LANGUAGES CXX CUDA)
 
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+
 add_executable("${CMAKE_PROJECT_NAME}")
 
 set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 20)
@@ -46,8 +51,10 @@ add_subdirectory(sources/scattering_record)
 add_subdirectory(sources/window)
 add_subdirectory(sources/kernel)
 add_subdirectory(sources/framebuffer)
+add_subdirectory(sources/shader)
 
 add_compile_definitions(SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
+add_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC SHADERS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/shaders/")
 
 target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES} )
 
@@ -68,6 +75,6 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${CUDAToolkit_INCLUDE_DIRS})
 
 
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Kernel Ray Window Renderer)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Kernel Ray Window Renderer Shader)
 
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm glfw glad)
