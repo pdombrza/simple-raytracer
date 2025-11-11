@@ -24,7 +24,7 @@ cmake --build out --config Debug
 * multithreading - done
 * Render to window instead of a bitmap file - done
 * CUDA - done
-* OpenGL window instead of WinAPI
+* OpenGL window instead of WinAPI - done
 * BHV acceleration
 * polygon meshes 
 * other optimizations 
@@ -34,4 +34,5 @@ cmake --build out --config Debug
 
 ### The final render
 ![render so far](renders/output.png)
+
 
