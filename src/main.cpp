@@ -111,13 +111,13 @@ int main() {
 		int numPixels = width * height;
 		
 		CameraOrientation orientation;
-		orientation.lookFrom = glm::vec3(13.0f, 2.0f, 3.0f);
+		orientation.lookFrom = glm::vec3(0.0f, 0.0f, 1.0f);
 		orientation.lookAt = glm::vec3(0.0f, 0.0f, 0.0f);
 		orientation.vUp = glm::vec3(0.0f, 1.0f, 0.0f);
 		Camera h_camera(orientation, 90.0f, (float)width / (float)height);
-		h_camera.setVFov(20.0f);
-		h_camera.setDefocusAngle(0.6f);
-		h_camera.setFocusDist(10.0f);
+		//h_camera.setVFov(20.0f);
+		//h_camera.setDefocusAngle(0.6f);
+		//h_camera.setFocusDist(10.0f);
 
 		HittableList scene{};
 
