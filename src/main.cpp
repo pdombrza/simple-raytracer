@@ -9,6 +9,7 @@
 #include <cuda_gl_interop.h>
 
 #include "camera/camera.h"
+#include "camera/camera_controller.h"
 #include "renderer/renderer.h"
 #include "hittable/hittable.h"
 #include "hittablelist/hittablelist.h"
@@ -118,6 +119,24 @@ int main() {
 		//h_camera.setVFov(20.0f);
 		//h_camera.setDefocusAngle(0.6f);
 		//h_camera.setFocusDist(10.0f);
+		CameraController controller(orientation);
+		glfwSetWindowUserPointer(window, &controller);
+		glfwSetCursorPosCallback(window, [](GLFWwindow* w, double xpos, double ypos) {
+			static float lastX = 600, lastY = 400;
+			static bool firstMouse = true;
+
+			if (firstMouse) {
+				lastX = xpos; lastY = ypos;
+				firstMouse = false;
+			}
+
+			float xoffset = xpos - lastX;
+			float yoffset = lastY - ypos;
+			lastX = xpos; lastY = ypos;
+
+			auto* ctrl = static_cast<CameraController*>(glfwGetWindowUserPointer(w));
+			ctrl->processMouse(xoffset, yoffset);
+		});
 
 		HittableList scene{};
 
@@ -128,10 +147,22 @@ int main() {
 
 		glViewport(0, 0, width, height);
 		glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) -> void { glViewport(0, 0, width, height); });
-		renderer.render(h_camera); // Render once for now - too slow to do multiple frames
-
+		renderer.render(h_camera);
+		float lastFrame = 0.0f;
 		while (!glfwWindowShouldClose(window)) {
-			processInput(window);
+			float currentFrame = glfwGetTime();
+			float deltaTime = currentFrame - lastFrame;
+			lastFrame = currentFrame;
+			controller.handleInputs(window, deltaTime);
+
+			if (controller.isChanged()) {
+				orientation = controller.getOrientation();
+				h_camera.setCameraOrientation(orientation);
+
+				renderer.render(h_camera);
+
+				controller.clearChanged();
+			}
 
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);

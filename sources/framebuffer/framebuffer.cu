@@ -45,12 +45,12 @@ __device__ glm::vec3 Framebuffer::color(const Ray& ray, HittableList* world, uti
 __device__ glm::vec3 Framebuffer::colorPixel(int i, int j, int nx, int ny, Camera* camera, HittableList* world, utils::random::RNG& rng) {
 	glm::vec3 col(0.0f);
 
-	for (int s = 0; s < 100; s++) {
+	for (int s = 0; s < 5; s++) {
 		Ray r = camera->getRay(i, j, rng);
 		col += color(r, world, rng);
 	}
 
-	col /= float(100);
+	col /= float(5);
 	col[0] = sqrtf(col[0]);
 	col[1] = sqrtf(col[1]);
 	col[2] = sqrtf(col[2]);

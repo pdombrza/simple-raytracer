@@ -48,6 +48,9 @@ void CudaRenderer::setupScene(Camera& camera) const { // TODO: use this in const
 }
 
 int CudaRenderer::render(Camera& camera) { // TODO: profile this
+	checkCudaErrors(cudaMemcpy(d_camera, &camera, sizeof(Camera), cudaMemcpyHostToDevice));
+	initCamera<<<1, 1>>>(d_camera, imgWidth, imgHeight);
+	checkCudaErrors(cudaDeviceSynchronize());
 	cudaSurfaceObject_t surfObj = 0;
 	if (glResource) {
 		cudaArray_t cuArray;
