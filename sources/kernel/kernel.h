@@ -15,7 +15,7 @@
 #include "material/material.h"
 #include "framebuffer/framebuffer.h"
 
-__global__ void renderScene(Framebuffer* d_Fb, Camera* camera, HittableList* world, curandState* randState, cudaSurfaceObject_t surfObj = 0);
+__global__ void renderScene(Framebuffer* d_Fb, Camera* camera, HittableList* world, curandState* randState, int frameIndex, cudaSurfaceObject_t surfObj = 0);
 __global__ void initCamera(Camera* cam, int width, int height);
 __global__ void createWorld(Hittable** d_List, HittableList* d_World);
 __global__ void destroyWorld(Hittable** d_List, HittableList* d_World, int size);

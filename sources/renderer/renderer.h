@@ -27,7 +27,7 @@
 class IRenderer {
 public:
 	virtual ~IRenderer() = default;
-	virtual int render(Camera& camera) = 0;
+	virtual int render(Camera& camera, bool resetFrameIndex) = 0;
 	virtual void setScene(HittableList* newScene) = 0;
 	virtual HittableList* getScene() const = 0;
 };
@@ -51,6 +51,7 @@ protected:
 	int maxDepth = 10;
 	int xBlock = 16;
 	int yBlock = 16;
+	int frameIndex = 1;
 	float pixelSamplesScale{};
 	virtual void initRenderer();
 public:
@@ -71,6 +72,6 @@ public:
 	void registerGLTexture(GLuint glTex);
 	virtual void setupScene(Camera& camera) const;
 	virtual void destroyScene() const;
-	virtual int render(Camera& camera) override;
+	virtual int render(Camera& camera, bool resetFrameIndex) override;
 	std::shared_ptr<glm::vec3[]> getHostPixels() const { return h_Fb.getHostPixels(); };
 };

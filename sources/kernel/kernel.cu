@@ -1,6 +1,6 @@
 #include "kernel.h"
 
-__global__ void renderScene(Framebuffer* d_Fb, Camera* camera, HittableList* world, curandState *randState, cudaSurfaceObject_t surfObj) {
+__global__ void renderScene(Framebuffer* d_Fb, Camera* camera, HittableList* world, curandState *randState, int frameIndex, cudaSurfaceObject_t surfObj) {
 	int x = d_Fb->getWidth();
 	int y = d_Fb->getHeight();
     int i = threadIdx.x + blockIdx.x * blockDim.x;
@@ -10,12 +10,19 @@ __global__ void renderScene(Framebuffer* d_Fb, Camera* camera, HittableList* wor
 	curandState* localRandState = &randState[pixelIdx];
 	utils::random::RNG rng(localRandState);
 	glm::vec3 col = d_Fb->colorPixel(i, j, x, y, camera, world, rng);
+	d_Fb->writePixel(i, j, col, frameIndex);
+	float4 pixelColor = d_Fb->getPixels()[pixelIdx];
+	pixelColor.x = sqrtf(pixelColor.x / static_cast<float>(frameIndex));
+	pixelColor.y = sqrtf(pixelColor.y / static_cast<float>(frameIndex));
+	pixelColor.z = sqrtf(pixelColor.z / static_cast<float>(frameIndex));
 	if (surfObj) {
-		uchar4 px = make_uchar4(col.r * 255, col.g * 255, col.b * 255, 255);
+		uchar4 px = make_uchar4(
+			static_cast<unsigned char>(glm::clamp(pixelColor.x, 0.0f, 0.999f) * 255.99f), 
+			static_cast<unsigned char>(glm::clamp(pixelColor.y, 0.0f, 0.999f) * 255.99f), 
+			static_cast<unsigned char>(glm::clamp(pixelColor.z, 0.0f, 0.999f) * 255.99f), 
+			255
+		);
 		surf2Dwrite(px, surfObj, i * sizeof(uchar4), (y - 1 - j));
-	}
-	else {
-		d_Fb->writePixel(i, j, col);
 	}
 }
 

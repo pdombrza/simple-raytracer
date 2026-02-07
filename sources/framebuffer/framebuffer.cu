@@ -13,10 +13,15 @@ __host__ void Framebuffer::cleanup() {
 	}
 }
 
-__device__ void Framebuffer::writePixel(int x, int y, const glm::vec3& color) {
+__device__ void Framebuffer::writePixel(int x, int y, const glm::vec3& color, int frameIndex) {
 	int index = y * width + x;
-	glm::vec3 col = glm::clamp(color, glm::vec3(0.0f), glm::vec3(1.0f));
-	pixels[index] = make_float4(col.r, col.g, col.b, 1.0f);
+	if (frameIndex <= 1) {
+		pixels[index] = make_float4(color.r, color.g, color.b, 1.0f);
+	}
+	else {
+		float4 currentColor = pixels[index];
+		pixels[index] = make_float4(currentColor.x + color.r, currentColor.y + color.g, currentColor.z + color.b, 1.0f);
+	}
 }
 
 __device__ glm::vec3 Framebuffer::color(const Ray& ray, HittableList* world, utils::random::RNG& rng) {
@@ -43,17 +48,8 @@ __device__ glm::vec3 Framebuffer::color(const Ray& ray, HittableList* world, uti
 }
 
 __device__ glm::vec3 Framebuffer::colorPixel(int i, int j, int nx, int ny, Camera* camera, HittableList* world, utils::random::RNG& rng) {
-	glm::vec3 col(0.0f);
-
-	for (int s = 0; s < 5; s++) {
-		Ray r = camera->getRay(i, j, rng);
-		col += color(r, world, rng);
-	}
-
-	col /= float(5);
-	col[0] = sqrtf(col[0]);
-	col[1] = sqrtf(col[1]);
-	col[2] = sqrtf(col[2]);
+	Ray r = camera->getRay(i, j, rng);
+	glm::vec3 col = color(r, world, rng);
 	return col;
 }
 

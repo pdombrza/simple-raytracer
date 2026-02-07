@@ -47,7 +47,8 @@ void CudaRenderer::setupScene(Camera& camera) const { // TODO: use this in const
 	checkCudaErrors(cudaDeviceSynchronize());
 }
 
-int CudaRenderer::render(Camera& camera) { // TODO: profile this
+int CudaRenderer::render(Camera& camera, bool resetFrameIndex) { // TODO: profile this
+	if (resetFrameIndex) frameIndex = 1;
 	checkCudaErrors(cudaMemcpy(d_camera, &camera, sizeof(Camera), cudaMemcpyHostToDevice));
 	initCamera<<<1, 1>>>(d_camera, imgWidth, imgHeight);
 	checkCudaErrors(cudaDeviceSynchronize());
@@ -65,10 +66,10 @@ int CudaRenderer::render(Camera& camera) { // TODO: profile this
 	dim3 blocks(imgWidth / xBlock + 1, imgHeight / yBlock + 1);
 	dim3 threads(xBlock, yBlock);
 
-	renderScene<<<blocks, threads>>>(d_Fb, d_camera, d_World, d_randStates, surfObj);
+	renderScene<<<blocks, threads>>>(d_Fb, d_camera, d_World, d_randStates, frameIndex, surfObj);
 	checkCudaErrors(cudaGetLastError());
-	//checkCudaErrors(cudaDeviceSynchronize());
-
+	checkCudaErrors(cudaDeviceSynchronize());
+	frameIndex++;
 	if (glResource) {
 		checkCudaErrors(cudaDestroySurfaceObject(surfObj));
 		checkCudaErrors(cudaGraphicsUnmapResources(1, &glResource));

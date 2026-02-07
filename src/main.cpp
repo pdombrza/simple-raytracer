@@ -147,22 +147,21 @@ int main() {
 
 		glViewport(0, 0, width, height);
 		glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) -> void { glViewport(0, 0, width, height); });
-		renderer.render(h_camera);
 		float lastFrame = 0.0f;
+
 		while (!glfwWindowShouldClose(window)) {
 			float currentFrame = glfwGetTime();
 			float deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;
 			controller.handleInputs(window, deltaTime);
-
-			if (controller.isChanged()) {
+			bool moved = controller.isChanged();
+			if (moved) {
 				orientation = controller.getOrientation();
 				h_camera.setCameraOrientation(orientation);
-
-				renderer.render(h_camera);
-
 				controller.clearChanged();
 			}
+
+			renderer.render(h_camera, moved);
 
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
