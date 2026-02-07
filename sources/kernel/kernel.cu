@@ -10,11 +10,12 @@ __global__ void renderScene(Framebuffer* d_Fb, Camera* camera, HittableList* wor
 	curandState* localRandState = &randState[pixelIdx];
 	utils::random::RNG rng(localRandState);
 	glm::vec3 col = d_Fb->colorPixel(i, j, x, y, camera, world, rng);
+	if (d_Fb->isBad(col)) col = glm::vec3(0.0f);
 	d_Fb->writePixel(i, j, col, frameIndex);
 	float4 pixelColor = d_Fb->getPixels()[pixelIdx];
-	pixelColor.x = sqrtf(pixelColor.x / static_cast<float>(frameIndex));
-	pixelColor.y = sqrtf(pixelColor.y / static_cast<float>(frameIndex));
-	pixelColor.z = sqrtf(pixelColor.z / static_cast<float>(frameIndex));
+	pixelColor.x = sqrtf(pixelColor.x);
+	pixelColor.y = sqrtf(pixelColor.y);
+	pixelColor.z = sqrtf(pixelColor.z);
 	if (surfObj) {
 		uchar4 px = make_uchar4(
 			static_cast<unsigned char>(glm::clamp(pixelColor.x, 0.0f, 0.999f) * 255.99f), 

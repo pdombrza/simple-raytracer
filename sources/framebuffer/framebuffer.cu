@@ -20,7 +20,11 @@ __device__ void Framebuffer::writePixel(int x, int y, const glm::vec3& color, in
 	}
 	else {
 		float4 currentColor = pixels[index];
-		pixels[index] = make_float4(currentColor.x + color.r, currentColor.y + color.g, currentColor.z + color.b, 1.0f);
+		float a = 1.0f / (float)frameIndex;
+		float newR = currentColor.x * (1.0f - a) + color.r * a;
+		float newG = currentColor.y * (1.0f - a) + color.g * a;
+		float newB = currentColor.z * (1.0f - a) + color.b * a;
+		pixels[index] = make_float4(newR, newG, newB, 1.0f);
 	}
 }
 
@@ -51,6 +55,10 @@ __device__ glm::vec3 Framebuffer::colorPixel(int i, int j, int nx, int ny, Camer
 	Ray r = camera->getRay(i, j, rng);
 	glm::vec3 col = color(r, world, rng);
 	return col;
+}
+
+__device__ bool Framebuffer::isBad(const glm::vec3& c) {
+	return isnan(c.r) || isnan(c.g) || isnan(c.b) || isinf(c.r) || isinf(c.g) || isinf(c.b);
 }
 
 __host__ std::shared_ptr<glm::vec3[]> Framebuffer::getHostPixels() const {
