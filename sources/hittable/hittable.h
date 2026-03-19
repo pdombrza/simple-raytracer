@@ -48,3 +48,21 @@ public:
 	__device__ virtual Material* getMaterial() const override;
 	__device__ virtual glm::vec3 getCenter() const override;
 };
+
+
+class Triangle : public Hittable {
+protected:
+	Material* material = nullptr;
+	glm::vec3 v0{}, v1{}, v2{};
+	glm::vec3 normal{};
+public:
+	__device__ ~Triangle() = default;
+	__device__ explicit Triangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, Material* mat) : Hittable(), v0(v0), v1(v1), v2(v2), material(mat) {
+		normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+	};
+	__device__ virtual cuda::std::optional<HitRecord> hit(const Ray& ray, float rayTMin, float rayTMax) const override;
+	__device__ virtual HitRecord constructHitRecord(const Ray& ray, float t) const override;
+	__device__ virtual void setMaterial(Material* mat) override;
+	__device__ virtual Material* getMaterial() const override;
+	__device__ virtual glm::vec3 getCenter() const override;
+};

@@ -36,11 +36,30 @@ __global__ void initCamera(Camera* cam, int width, int height) {
 __global__ void createWorld(Hittable** d_List, HittableList* d_World) {
 	if (threadIdx.x == 0 && blockIdx.x == 0) {
 		d_List[0] = new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f, new Lambertian(glm::vec3(0.1f, 0.2f, 0.5f)));
-		d_List[1] = new Sphere(glm::vec3(0.0f, -100.5f, -1.0f), 100.0f, new Lambertian(glm::vec3(0.8f, 0.8f, 0.0f)));
-		d_List[2] = new Sphere(glm::vec3(1.0f, 0.0f, -1.0f), 0.5, new Metal(glm::vec3(0.8f, 0.6f, 0.2f), 0.5f));
-		d_List[3] = new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.5, new Dielectric(1.5f));
-		d_List[4] = new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.45, new Dielectric(1.0f / 1.5f));
-		new(d_World) HittableList(d_List, 5, 5);
+		d_List[1] = new Sphere(glm::vec3(1.0f, 0.0f, -1.0f), 0.5, new Metal(glm::vec3(0.8f, 0.6f, 0.2f), 0.5f));
+		d_List[2] = new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.5, new Dielectric(1.5f));
+		d_List[3] = new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.45, new Dielectric(1.0f / 1.5f));
+		d_List[4] = new Triangle(
+			glm::vec3(-2.0f, -0.5f, -2.0f),
+			glm::vec3(2.0f, -0.5f, -2.0f),
+			glm::vec3(0.0f, 1.5f, -2.0f), 
+			new Lambertian(glm::vec3(0.4f, 0.2f, 0.1f))
+		);
+		Material* floor_mat = new Lambertian(glm::vec3(0.8f, 0.8f, 0.0f));
+		d_List[5] = new Triangle(
+			glm::vec3(-100.0f, -0.5f, 100.0f),
+			glm::vec3(-100.0f, -0.5f, -100.0f),
+			glm::vec3(100.0f, -0.5f, -100.0f),
+			floor_mat
+		);
+
+		d_List[6] = new Triangle(
+			glm::vec3(-100.0f, -0.5f, 100.0f),
+			glm::vec3(100.0f, -0.5f, -100.0f),
+			glm::vec3(100.0f, -0.5f, 100.0f),
+			floor_mat
+		);
+		new(d_World) HittableList(d_List, 7, 7);
 	}
 }
 
