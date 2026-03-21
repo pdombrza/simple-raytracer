@@ -52,6 +52,7 @@ add_subdirectory(sources/window)
 add_subdirectory(sources/kernel)
 add_subdirectory(sources/framebuffer)
 add_subdirectory(sources/shader)
+add_subdirectory(sources/mesh)
 
 add_compile_definitions(SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
 add_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC SHADERS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/shaders/")

@@ -14,6 +14,7 @@
 #include "camera/camera.h"
 #include "material/material.h"
 #include "framebuffer/framebuffer.h"
+#include "mesh/mesh.h"
 
 __global__ void renderScene(Framebuffer* d_Fb, Camera* camera, HittableList* world, curandState* randState, int frameIndex, cudaSurfaceObject_t surfObj = 0);
 __global__ void initCamera(Camera* cam, int width, int height);
