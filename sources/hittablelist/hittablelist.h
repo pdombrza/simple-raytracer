@@ -7,17 +7,20 @@
 #include "hittable/hittable.h"
 #include "material/material.h"
 #include "hitrec/hitrec.h"
+#include "mesh/mesh.h"
 #include "ray/ray.h"
 
 
 class HittableList {
 private:
 	Hittable** objects = nullptr;
+	Mesh* meshes = nullptr;
 	int objCount = 0;
+	int meshCount = 0;
 	int capacity = 0;
 public:
 	__device__ HittableList() = default;
-	__device__ HittableList(Hittable** objectArray, int numObjects, int capacity) : objects(objectArray), objCount(numObjects), capacity(capacity) {};
+	__device__ HittableList(Hittable** objectArray, int numObjects, Mesh* meshes, int meshCount, int capacity) : objects(objectArray), objCount(numObjects), meshes(meshes), meshCount(meshCount), capacity(capacity) {};
 	__device__ ~HittableList() = default;
 	__device__ void clear();
 	__device__ void add(Hittable* hittable);
@@ -26,4 +29,5 @@ public:
 	__device__ int getCapacity() const { return capacity; };
 	__host__ __device__ Hittable** getObjects() const { return objects; };
 	__host__ __device__ void setObjects(Hittable** newObjects) { objects = newObjects; };
+	__device__ int getMeshCount() const { return meshCount; };
 };

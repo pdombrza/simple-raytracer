@@ -20,6 +20,8 @@
 #include "window/windinput.h"
 
 void processInput(GLFWwindow* window);
+void addBoxToScene(std::vector<glm::vec3>& vertices, std::vector<int>& indices, std::vector<MeshDescriptor>& descriptors);
+void addPyramidToScene(std::vector<glm::vec3>& vertices, std::vector<int>& indices, std::vector<MeshDescriptor>& descriptors);
 
 int main() {
 	{
@@ -139,8 +141,16 @@ int main() {
 		});
 
 		HittableList scene{};
+		std::vector<glm::vec3> h_vertices{};
+		std::vector<int> h_indices{};
+		std::vector<MeshDescriptor> h_meshDescriptors{};
 
+		addBoxToScene(h_vertices, h_indices, h_meshDescriptors);
+		addPyramidToScene(h_vertices, h_indices, h_meshDescriptors);
 		CudaRenderer renderer(&scene, width, height);
+		renderer.setNumObjects(6);
+		renderer.setNumMeshes(2);
+		renderer.setMeshData(h_vertices, h_indices, h_meshDescriptors);
 		renderer.registerGLTexture(glTex);
 		renderer.setupScene(h_camera);
 		shader.use();
@@ -185,4 +195,60 @@ int main() {
 void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+}
+
+
+void addBoxToScene(std::vector<glm::vec3>& vertices, std::vector<int>& indices, std::vector<MeshDescriptor>& descriptors) {
+	MeshDescriptor desc;
+	desc.vertexOffset = vertices.size();
+	desc.indexOffset = indices.size();
+	desc.triangleCount = 12;
+
+	vertices.push_back({ -3.5, -0.5, -0.5 });
+	vertices.push_back({ -2.5, -0.5, -0.5 });
+	vertices.push_back({ -2.5,  0.5, -0.5 });
+	vertices.push_back({ -3.5,  0.5, -0.5 });
+	vertices.push_back({ -3.5, -0.5,  0.5 });
+	vertices.push_back({ -2.5, -0.5,  0.5 });
+	vertices.push_back({ -2.5,  0.5,  0.5 });
+	vertices.push_back({ -3.5,  0.5,  0.5 });
+
+	int boxIndices[] = {
+		0, 1, 3, 3, 1, 2,
+		1, 5, 2, 2, 5, 6,
+		5, 4, 6, 6, 4, 7,
+		4, 0, 7, 7, 0, 3,
+		3, 2, 7, 7, 2, 6,
+		4, 5, 0, 0, 5, 1
+	};
+	for (int i : boxIndices) indices.push_back(i);
+
+	descriptors.push_back(desc);
+}
+
+
+void addPyramidToScene(std::vector<glm::vec3>& vertices, std::vector<int>& indices, std::vector<MeshDescriptor>& descriptors) {
+	MeshDescriptor desc;
+	desc.vertexOffset = (int)vertices.size();
+	desc.indexOffset = (int)indices.size();
+	desc.triangleCount = 6;
+	vertices.push_back({ 3.0f,  1.0f, -2.5f });
+	vertices.push_back({ 2.5f,  0.0f, -2.0f }); 
+	vertices.push_back({ 3.5f,  0.0f, -2.0f });
+	vertices.push_back({ 2.5f,  0.0f, -3.0f });
+	vertices.push_back({ 3.5f,  0.0f, -3.0f });
+	int pyrIndices[] = {
+		1, 2, 0,
+		2, 4, 0,
+		4, 3, 0,
+		3, 1, 0,
+		1, 3, 4,
+		1, 4, 2
+	};
+
+	for (int i : pyrIndices) {
+		indices.push_back(i);
+	}
+
+	descriptors.push_back(desc);
 }

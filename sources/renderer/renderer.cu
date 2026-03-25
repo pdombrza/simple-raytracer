@@ -6,7 +6,6 @@ void CudaRenderer::initRenderer() {
 	checkCudaErrors(cudaMalloc((void**)&d_Fb, sizeof(Framebuffer)));
 	checkCudaErrors(cudaMemcpy(d_Fb, &h_Fb, sizeof(Framebuffer), cudaMemcpyHostToDevice));
 	checkCudaErrors(cudaMalloc((void**)&d_camera, sizeof(Camera)));
-	checkCudaErrors(cudaMalloc((void**)&d_List, 5 * sizeof(Hittable*)));
 	checkCudaErrors(cudaMalloc((void**)&d_World, sizeof(HittableList)));
 	checkCudaErrors(cudaMalloc((void**)&d_randStates, numPixels * sizeof(curandState)));
 }
@@ -22,6 +21,10 @@ CudaRenderer::~CudaRenderer() {
 	d_camera = nullptr;
 	checkCudaErrors(cudaFree(d_randStates));
 	d_randStates = nullptr;
+	checkCudaErrors(cudaFree(d_vertices));
+	d_vertices = nullptr;
+	checkCudaErrors(cudaFree(d_indices));
+	d_indices = nullptr;
 	if (glResource) cudaGraphicsUnregisterResource(glResource); // TODO: consider decoupling gl from renderer - move to separate class
 }
 
@@ -29,8 +32,22 @@ void CudaRenderer::registerGLTexture(GLuint glTex) {
 	cudaGraphicsGLRegisterImage(&glResource, glTex, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsSurfaceLoadStore);
 }
 
-void CudaRenderer::setupScene(Camera& camera) const { // TODO: use this in constuctor
+void CudaRenderer::setupScene(Camera& camera) { // TODO: use this in constuctor
 	int numPixels = imgWidth * imgHeight;
+	int vertexAmount = h_vertices.size();
+	int indexAmount = h_indices.size();
+	int meshAmount = meshDescriptors.size();
+	checkCudaErrors(cudaMalloc((void**)&d_List, numObjects * sizeof(Hittable*)));
+	checkCudaErrors(cudaMalloc((void**)&d_vertices, vertexAmount * sizeof(glm::vec3)));
+	checkCudaErrors(cudaMalloc((void**)&d_indices, indexAmount * sizeof(int)));
+
+	MeshDescriptor* d_meshDescriptors;
+	checkCudaErrors(cudaMalloc((void**)&d_meshDescriptors, meshAmount * sizeof(MeshDescriptor)));
+	checkCudaErrors(cudaMalloc((void**)&d_meshes, meshAmount * sizeof(Mesh)));
+
+	checkCudaErrors(cudaMemcpy(d_vertices, h_vertices.data(), vertexAmount * sizeof(glm::vec3), cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(d_indices, h_indices.data(), indexAmount * sizeof(int), cudaMemcpyHostToDevice));
+	checkCudaErrors(cudaMemcpy(d_meshDescriptors, meshDescriptors.data(), meshAmount * sizeof(MeshDescriptor), cudaMemcpyHostToDevice));
 
 	checkCudaErrors(cudaMemcpy(d_camera, &camera, sizeof(Camera), cudaMemcpyHostToDevice));
 	initCamera<<<1, 1>>>(d_camera, imgWidth, imgHeight);
@@ -42,9 +59,10 @@ void CudaRenderer::setupScene(Camera& camera) const { // TODO: use this in const
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 
-	createWorld<<<1, 1>>>(d_List, d_World);
+	createWorld<<<1, 1>>>(d_List, d_World, d_vertices, d_indices, d_meshDescriptors, meshAmount, d_meshes, numObjects);
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
+	checkCudaErrors(cudaFree(d_meshDescriptors));
 }
 
 int CudaRenderer::render(Camera& camera, bool resetFrameIndex) { // TODO: profile this
@@ -79,7 +97,13 @@ int CudaRenderer::render(Camera& camera, bool resetFrameIndex) { // TODO: profil
 }
 
 void CudaRenderer::destroyScene() const {
-	destroyWorld<<<1, 1>>>(d_List, d_World, 5);
+	destroyWorld<<<1, 1>>>(d_List, d_World, d_meshes);
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
+}
+
+void CudaRenderer::setMeshData(std::vector<glm::vec3> vertexArray, std::vector<int> indexArray, std::vector<MeshDescriptor> descriptors) {
+	h_vertices = vertexArray;
+	h_indices = indexArray;
+	meshDescriptors = descriptors;
 }
