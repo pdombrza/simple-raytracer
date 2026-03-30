@@ -8,6 +8,9 @@
 #include <GLFW/glfw3.h>
 #include <cuda_gl_interop.h>
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+
 #include "camera/camera.h"
 #include "camera/camera_controller.h"
 #include "renderer/renderer.h"
