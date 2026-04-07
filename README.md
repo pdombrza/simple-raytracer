@@ -20,14 +20,15 @@ cmake --build out --config Debug
 * glm
 * cuda toolkit
 * OpenGL - glfw, glad
+* tinyobjloader
 
 ### TODO
 * multithreading - done
 * Render to window instead of a bitmap file - done
 * CUDA - done
 * OpenGL window instead of WinAPI - done
+* triangle meshes - done 
 * BHV acceleration
-* polygon meshes 
 * other optimizations 
 * light sources
 * textures 
