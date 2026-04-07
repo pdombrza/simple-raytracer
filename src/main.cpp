@@ -1,11 +1,13 @@
 #include <iostream>
 #include <memory>
 #include <chrono>
-#include <cuda_runtime.h>
+#include <unordered_map>
 
 #include <glm/glm.hpp>
+#include <glm/gtx/hash.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -109,7 +111,6 @@ int main() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-
 		int xBlock = 16;
 		int yBlock = 16;
 		std::cerr << "Rendering a " << width << "x" << height << " image " << std::endl;
@@ -143,16 +144,71 @@ int main() {
 			ctrl->processMouse(xoffset, yoffset);
 		});
 
+		// prepare vertex array, index array and mesh descriptors
 		HittableList scene{};
 		std::vector<glm::vec3> h_vertices{};
 		std::vector<int> h_indices{};
 		std::vector<MeshDescriptor> h_meshDescriptors{};
 
+		// Load the models
+		std::string inputfile = MODELS_PATH "marble_bust_01_4k.obj";
+		tinyobj::ObjReaderConfig reader_config;
+		reader_config.mtl_search_path = MODELS_PATH;
+
+		tinyobj::ObjReader reader;
+		if (!reader.ParseFromFile(inputfile, reader_config)) {
+			if (!reader.Error().empty()) {
+				std::cerr << "TinyObjReader: " << reader.Error();
+			}
+			exit(1);
+		}
+
+		if (!reader.Warning().empty()) {
+			std::cout << "TinyObjReader: " << reader.Warning();
+		}
+
+		auto& attrib = reader.GetAttrib();
+		auto& shapes = reader.GetShapes();
+		auto& materials = reader.GetMaterials();
+		h_vertices.reserve(attrib.vertices.size() / 3);
+		h_indices.reserve(attrib.vertices.size() / 3); // Roughly
+
+		// Loop over shapes
+		for (size_t s = 0; s < shapes.size(); s++) {
+			// Loop over faces(polygon)
+			MeshDescriptor desc{};
+			desc.vertexOffset = h_vertices.size();
+			desc.indexOffset = h_indices.size();
+			size_t indexOffset = 0;
+			std::unordered_map<glm::vec3, int> uniqueVertices{};
+			int vertexCounter = 0;
+
+			for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
+				for (size_t v = 0; v < 3; v++) {
+					tinyobj::index_t idx = shapes[s].mesh.indices[indexOffset + v];
+
+					glm::vec3 vertex = {
+						attrib.vertices[3 * idx.vertex_index + 0],
+						attrib.vertices[3 * idx.vertex_index + 1],
+						attrib.vertices[3 * idx.vertex_index + 2]
+					};
+					if (uniqueVertices.find(vertex) == uniqueVertices.end()) {
+						uniqueVertices[vertex] = vertexCounter++; // Assign it the next available slot
+						h_vertices.emplace_back(vertex);
+					}
+					h_indices.push_back(uniqueVertices[vertex]);
+				}
+				indexOffset += 3;
+			}
+			desc.triangleCount = (h_indices.size() - desc.indexOffset) / 3;
+			h_meshDescriptors.push_back(desc);
+		}
+
 		addBoxToScene(h_vertices, h_indices, h_meshDescriptors);
 		addPyramidToScene(h_vertices, h_indices, h_meshDescriptors);
 		CudaRenderer renderer(&scene, width, height);
 		renderer.setNumObjects(6);
-		renderer.setNumMeshes(2);
+		renderer.setNumMeshes(3);	
 		renderer.setMeshData(h_vertices, h_indices, h_meshDescriptors);
 		renderer.registerGLTexture(glTex);
 		renderer.setupScene(h_camera);
@@ -232,8 +288,8 @@ void addBoxToScene(std::vector<glm::vec3>& vertices, std::vector<int>& indices, 
 
 void addPyramidToScene(std::vector<glm::vec3>& vertices, std::vector<int>& indices, std::vector<MeshDescriptor>& descriptors) {
 	MeshDescriptor desc;
-	desc.vertexOffset = (int)vertices.size();
-	desc.indexOffset = (int)indices.size();
+	desc.vertexOffset = vertices.size();
+	desc.indexOffset = indices.size();
 	desc.triangleCount = 6;
 	vertices.push_back({ 3.0f,  1.0f, -2.5f });
 	vertices.push_back({ 2.5f,  0.0f, -2.0f }); 
