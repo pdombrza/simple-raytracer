@@ -1,7 +1,5 @@
 #include "camera_controller.h"
 
-#include "CameraUIControl.h"
-
 void CameraController::handleInputs(GLFWwindow * window, float deltaTime) {
     float velocity = movementSpeed * deltaTime;
     glm::vec3 forward = glm::normalize(orientation.lookAt - orientation.lookFrom);
