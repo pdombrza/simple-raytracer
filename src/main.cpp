@@ -23,6 +23,8 @@
 #include "shader/shader.h"
 #include "window/window.h"
 #include "window/windinput.h"
+#include "aabb/aabb.h"
+#include "bvh/bvh.h"
 
 void processInput(GLFWwindow* window);
 void addBoxToScene(std::vector<glm::vec3>& vertices, std::vector<int>& indices, std::vector<MeshDescriptor>& descriptors);
@@ -171,8 +173,7 @@ int main() {
 		auto& shapes = reader.GetShapes();
 		auto& materials = reader.GetMaterials();
 		h_vertices.reserve(attrib.vertices.size() / 3);
-		h_indices.reserve(attrib.vertices.size() / 3); // Roughly
-
+		h_indices.reserve(attrib.vertices.size() / 3); // 
 		// Loop over shapes
 		for (size_t s = 0; s < shapes.size(); s++) {
 			// Loop over faces(polygon)
@@ -200,7 +201,8 @@ int main() {
 				}
 				indexOffset += 3;
 			}
-			desc.triangleCount = (h_indices.size() - desc.indexOffset) / 3;
+			int triangleCount = (int) (h_indices.size() - desc.indexOffset) / 3;
+			desc.triangleCount = triangleCount;
 			h_meshDescriptors.push_back(desc);
 		}
 

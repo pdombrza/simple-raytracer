@@ -32,7 +32,24 @@ void CudaRenderer::registerGLTexture(GLuint glTex) {
 	cudaGraphicsGLRegisterImage(&glResource, glTex, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsSurfaceLoadStore);
 }
 
-void CudaRenderer::setupScene(Camera& camera) { // TODO: use this in constuctor
+void CudaRenderer::setupScene(Camera& camera) {
+	std::vector<TriangleInfo> triangles{};
+	for (auto mesh : meshDescriptors) {
+		for (int i = 0; i < mesh.triangleCount; i++) {
+			int idx0 = h_indices[mesh.indexOffset + i * 3 + 0];
+			int idx1 = h_indices[mesh.indexOffset + i * 3 + 1];
+			int idx2 = h_indices[mesh.indexOffset + i * 3 + 2];
+			AABB bbox = buildTriangleAABB(h_vertices[idx0], h_vertices[idx1], h_vertices[idx2]);
+			triangles.emplace_back(mesh.indexOffset + i * 3, bbox);
+		}
+	}
+	AABB totalSceneAABB{};
+	AABB totalCentroidAABB{};
+	for (const auto& tri : triangles) {
+		totalSceneAABB.expand(tri.bbox);
+		totalCentroidAABB.expand(AABB(tri.centroid, tri.centroid));
+	}
+
 	int numPixels = imgWidth * imgHeight;
 	int vertexAmount = h_vertices.size();
 	int indexAmount = h_indices.size();

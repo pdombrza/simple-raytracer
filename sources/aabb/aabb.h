@@ -51,3 +51,22 @@ public:
 	__host__ __device__ void setMin(const glm::vec3& newMin) { bounds[0] = newMin; };
 	__host__ __device__ void setMax(const glm::vec3& newMax) { bounds[1] = newMax; };
 };
+
+AABB buildTriangleAABB(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2) {
+	float epsilon = 1e-5f; // minimum thickness to avoid degenerate boxes
+	glm::vec3 min = glm::vec3(fminf(v0.x, fminf(v1.x, v2.x)), fminf(v0.y, fminf(v1.y, v2.y)), fminf(v0.z, fminf(v1.z, v2.z)));
+	glm::vec3 max = glm::vec3(fmaxf(v0.x, fmaxf(v1.x, v2.x)), fmaxf(v0.y, fmaxf(v1.y, v2.y)), fmaxf(v0.z, fmaxf(v1.z, v2.z)));
+	if (max.x - min.x < epsilon) {
+		min.x -= epsilon;
+		max.x += epsilon;
+	}
+	if (max.y - min.y < epsilon) {
+		min.y -= epsilon;
+		max.y += epsilon;
+	}
+	if (max.z - min.z < epsilon) {
+		min.z -= epsilon;
+		max.z += epsilon;
+	}
+	return AABB(min, max);
+}

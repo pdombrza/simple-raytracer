@@ -18,9 +18,10 @@
 #include "hittablelist/hittablelist.h"
 #include "material/material.h"
 #include "camera/camera.h"
-#include "tobmp/tobmp.h"
 #include "color/color.h"
 #include "kernel/kernel.h"
+#include "bvh/bvh.h"
+#include "aabb/aabb.h"
 
 
 class IRenderer {
