@@ -55,6 +55,8 @@ add_subdirectory(sources/framebuffer)
 add_subdirectory(sources/shader)
 add_subdirectory(sources/mesh)
 add_subdirectory(sources/aabb)
+add_subdirectory(sources/bvh)
+
 
 add_compile_definitions(SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
 add_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC SHADERS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/shaders/")

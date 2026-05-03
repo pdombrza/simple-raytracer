@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <cuda/std/optional>
+#include <cuda/std/utility>
 #include <cuda_runtime.h>
 
 #include "utils/utils.h"
@@ -22,10 +23,11 @@ public:
 	__host__ __device__ ~AABB() = default;
 	__device__ bool hit(const Ray& ray, float rayTMin, float rayTMax) const {
 		for (int axis = 0; axis < 3; axis++) {
-			float t0 = (bounds[0][axis] - ray.getOrigin()[axis]) * ray.getInvDirection()[axis];
-			float t1 = (bounds[1][axis] - ray.getOrigin()[axis]) * ray.getInvDirection()[axis];
+			float invD = ray.getInvDirection()[axis];
+			float t0 = (bounds[0][axis] - ray.getOrigin()[axis]) * invD;
+			float t1 = (bounds[1][axis] - ray.getOrigin()[axis]) * invD;
 			if (invD < 0.0f) {
-				std::swap(t0, t1);
+				cuda::std::swap(t0, t1);
 			}
 			rayTMin = fmaxf(t0, rayTMin);
 			rayTMax = fminf(t1, rayTMax);
@@ -42,9 +44,28 @@ public:
 		bounds[0].z = fminf(bounds[0].z, other.bounds[0].z);
 
 		bounds[1].x = fmaxf(bounds[1].x, other.bounds[1].x);
+
 		bounds[1].y = fmaxf(bounds[1].y, other.bounds[1].y);
 		bounds[1].z = fmaxf(bounds[1].z, other.bounds[1].z);
 	};
+
+	__host__ __device__ int longestAxis() const {
+		glm::vec3 diag = bounds[1] - bounds[0];
+		if (diag.x > diag.y && diag.x > diag.z) {
+			return 0;
+		}
+		else if (diag.y > diag.z) {
+			return 1;
+		}
+		else {
+			return 2;
+		}
+	};
+
+	__host__ __device__ float surfaceArea() const {
+		glm::vec3 diag = bounds[1] - bounds[0];
+		return 2.0f * (diag.x * diag.y + diag.y * diag.z + diag.z * diag.x);
+	}
 
 	__host__ __device__ glm::vec3 getMin() const { return bounds[0]; };
 	__host__ __device__ glm::vec3 getMax() const { return bounds[1]; };
@@ -52,7 +73,7 @@ public:
 	__host__ __device__ void setMax(const glm::vec3& newMax) { bounds[1] = newMax; };
 };
 
-AABB buildTriangleAABB(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2) {
+inline AABB buildTriangleAABB(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2) {
 	float epsilon = 1e-5f; // minimum thickness to avoid degenerate boxes
 	glm::vec3 min = glm::vec3(fminf(v0.x, fminf(v1.x, v2.x)), fminf(v0.y, fminf(v1.y, v2.y)), fminf(v0.z, fminf(v1.z, v2.z)));
 	glm::vec3 max = glm::vec3(fmaxf(v0.x, fmaxf(v1.x, v2.x)), fmaxf(v0.y, fmaxf(v1.y, v2.y)), fmaxf(v0.z, fmaxf(v1.z, v2.z)));

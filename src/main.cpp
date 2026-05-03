@@ -175,14 +175,13 @@ int main() {
 		h_vertices.reserve(attrib.vertices.size() / 3);
 		h_indices.reserve(attrib.vertices.size() / 3); // 
 		// Loop over shapes
+		std::unordered_map<glm::vec3, int> uniqueVertices{};
+
 		for (size_t s = 0; s < shapes.size(); s++) {
-			// Loop over faces(polygon)
 			MeshDescriptor desc{};
 			desc.vertexOffset = h_vertices.size();
 			desc.indexOffset = h_indices.size();
 			size_t indexOffset = 0;
-			std::unordered_map<glm::vec3, int> uniqueVertices{};
-			int vertexCounter = 0;
 
 			for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
 				for (size_t v = 0; v < 3; v++) {
@@ -193,24 +192,25 @@ int main() {
 						attrib.vertices[3 * idx.vertex_index + 1],
 						attrib.vertices[3 * idx.vertex_index + 2]
 					};
+
 					if (uniqueVertices.find(vertex) == uniqueVertices.end()) {
-						uniqueVertices[vertex] = vertexCounter++; // Assign it the next available slot
+						uniqueVertices[vertex] = h_vertices.size();
 						h_vertices.emplace_back(vertex);
 					}
 					h_indices.push_back(uniqueVertices[vertex]);
 				}
 				indexOffset += 3;
 			}
-			int triangleCount = (int) (h_indices.size() - desc.indexOffset) / 3;
+			int triangleCount = (int)(h_indices.size() - desc.indexOffset) / 3;
 			desc.triangleCount = triangleCount;
 			h_meshDescriptors.push_back(desc);
 		}
 
-		addBoxToScene(h_vertices, h_indices, h_meshDescriptors);
-		addPyramidToScene(h_vertices, h_indices, h_meshDescriptors);
+		//addBoxToScene(h_vertices, h_indices, h_meshDescriptors);
+		//addPyramidToScene(h_vertices, h_indices, h_meshDescriptors);
 		CudaRenderer renderer(&scene, width, height);
 		renderer.setNumObjects(6);
-		renderer.setNumMeshes(3);	
+		renderer.setNumMeshes(1);	
 		renderer.setMeshData(h_vertices, h_indices, h_meshDescriptors);
 		renderer.registerGLTexture(glTex);
 		renderer.setupScene(h_camera);

@@ -43,10 +43,12 @@ private:
 	glm::vec3* d_vertices = nullptr;
 	Mesh* d_meshes = nullptr;
 	int* d_indices = nullptr;
+	LinearBVHNode* d_bvhNodes = nullptr;
 	std::vector<MeshDescriptor> meshDescriptors;
 	std::vector<glm::vec3> h_vertices;
 	std::vector<int> h_indices;
 	cudaGraphicsResource* glResource = nullptr;
+	BVHBuilder builder{};
 protected:
 	HittableList* scene;
 	int imgWidth = 400;

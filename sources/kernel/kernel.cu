@@ -33,25 +33,20 @@ __global__ void initCamera(Camera* cam, int width, int height) {
 	}
 }
 
-__global__ void createWorld(Hittable** d_List, HittableList* d_World, glm::vec3* vertexArray, int* indexArray, MeshDescriptor* descriptors, int meshCount, Mesh* d_meshes, int objCount) {
-    if (threadIdx.x == 0 && blockIdx.x == 0) {
-        d_List[0] = new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f, new Lambertian(glm::vec3(0.1f, 0.2f, 0.5f)));
-        d_List[1] = new Sphere(glm::vec3(1.0f, 0.0f, -1.0f), 0.5f, new Metal(glm::vec3(0.8f, 0.6f, 0.2f), 0.5f));
-        d_List[2] = new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.5f, new Dielectric(1.5f));
-        d_List[3] = new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.45f, new Dielectric(1.0f / 1.5f));
-        Material* floorMaterial = new Lambertian(glm::vec3(0.8f, 0.8f, 0.0f));
-        d_List[4] = new Triangle(glm::vec3(-100.f, -0.5f, 100.f), glm::vec3(-100.f, -0.5f, -100.f), glm::vec3(100.f, -0.5f, -100.f), floorMaterial);
-        d_List[5] = new Triangle(glm::vec3(-100.f, -0.5f, 100.f), glm::vec3(100.f, -0.5f, -100.f), glm::vec3(100.f, -0.5f, 100.f), floorMaterial);
+__global__ void createWorld(Hittable** d_List, HittableList* d_World, glm::vec3* vertexArray, int* indexArray, MeshDescriptor* descriptors, int meshCount, Mesh* d_meshes, LinearBVHNode* d_bvhNodes, int objCount) {
+	if (threadIdx.x == 0 && blockIdx.x == 0) {
+		d_List[0] = new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 0.5f, new Lambertian(glm::vec3(0.1f, 0.2f, 0.5f)));
+		d_List[1] = new Sphere(glm::vec3(1.0f, 0.0f, -1.0f), 0.5f, new Metal(glm::vec3(0.8f, 0.6f, 0.2f), 0.5f));
+		d_List[2] = new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.5f, new Dielectric(1.5f));
+		d_List[3] = new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.45f, new Dielectric(1.0f / 1.5f));
+		Material* floorMaterial = new Lambertian(glm::vec3(0.8f, 0.8f, 0.0f));
+		d_List[4] = new Triangle(glm::vec3(-100.f, -0.5f, 100.f), glm::vec3(-100.f, -0.5f, -100.f), glm::vec3(100.f, -0.5f, -100.f), floorMaterial);
+		d_List[5] = new Triangle(glm::vec3(-100.f, -0.5f, 100.f), glm::vec3(100.f, -0.5f, -100.f), glm::vec3(100.f, -0.5f, 100.f), floorMaterial);
 
-        for (int i = 0; i < meshCount; i++) {
-			MeshDescriptor& desc = descriptors[i];
-			glm::vec3* meshVertices = vertexArray + desc.vertexOffset;
-			int* meshIndices = indexArray + desc.indexOffset;
-			Material* mat = new Lambertian(glm::vec3(0.1f, 0.8f, 0.1f)); 
-			d_meshes[i] = Mesh(meshVertices, meshIndices, desc.triangleCount, mat);
-		}
-        new(d_World) HittableList(d_List, objCount, d_meshes, meshCount, objCount);
-    }
+		Material* mat = new Dielectric(1.0f / 1.5f);
+		d_meshes[0] = Mesh(vertexArray, indexArray, 0, d_bvhNodes, mat);
+		new(d_World) HittableList(d_List, objCount, d_meshes, 1, objCount);
+	}
 }
 
 __global__ void destroyWorld(Hittable** d_List, HittableList* d_World, Mesh* d_meshes) {
