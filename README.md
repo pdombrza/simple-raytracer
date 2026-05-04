@@ -28,7 +28,7 @@ cmake --build out --config Debug
 * CUDA - done
 * OpenGL window instead of WinAPI - done
 * triangle meshes - done 
-* BHV acceleration
+* BHV acceleration - done
 * other optimizations 
 * light sources
 * textures 
