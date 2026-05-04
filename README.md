@@ -1,5 +1,5 @@
-### Simple CUDA raytracer
-Based on the [raytracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html) and [this nvidia blogpost](https://developer.nvidia.com/blog/accelerated-ray-tracing-cuda/). The program draws a simple scene to a OpenGL window.
+### CUDA raytracer
+Based on the [raytracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html) and [this nvidia blogpost](https://developer.nvidia.com/blog/accelerated-ray-tracing-cuda/). The program draws a simple scene to a OpenGL window. 
 
 ### Build the project
 * Open the project in Visual Studio, then build and run with `ctrl+f5`
@@ -21,6 +21,7 @@ cmake --build out --config Debug
 * cuda toolkit
 * OpenGL - glfw, glad
 * tinyobjloader
+* stb_image
 
 ### TODO
 * multithreading - done
@@ -29,12 +30,13 @@ cmake --build out --config Debug
 * OpenGL window instead of WinAPI - done
 * triangle meshes - done 
 * BHV acceleration - done
+* cubemap - done
 * other optimizations 
 * light sources
 * textures 
 * optix
 
 ### The final render
-![render so far](renders/output.png)
+![render so far](renders/render.png)
 
 
