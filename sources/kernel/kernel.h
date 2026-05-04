@@ -16,7 +16,7 @@
 #include "framebuffer/framebuffer.h"
 #include "mesh/mesh.h"
 
-__global__ void renderScene(Framebuffer* d_Fb, Camera* camera, HittableList* world, curandState* randState, int frameIndex, cudaSurfaceObject_t surfObj = 0);
+__global__ void renderScene(Framebuffer* d_Fb, Camera* camera, HittableList* world, curandState* randState, int frameIndex, cudaTextureObject_t cubemapTexture,	 cudaSurfaceObject_t surfObj = 0);
 __global__ void initCamera(Camera* cam, int width, int height);
 __global__ void createWorld(Hittable** d_List, HittableList* d_World, glm::vec3* vertexArray, int* indexArray, MeshDescriptor* descriptors, int meshCount, Mesh* d_meshes, LinearBVHNode* nodes, int numObjects);
 __global__ void destroyWorld(Hittable** d_List, HittableList* d_World, Mesh* d_meshes);

@@ -28,7 +28,7 @@ __device__ void Framebuffer::writePixel(int x, int y, const glm::vec3& color, in
 	}
 }
 
-__device__ glm::vec3 Framebuffer::color(const Ray& ray, HittableList* world, utils::random::RNG& rng) {
+__device__ glm::vec3 Framebuffer::color(const Ray& ray, HittableList* world, cudaTextureObject_t cubemapTexture, utils::random::RNG& rng) {
 	Ray currentRay = ray;
 	glm::vec3 attenuation(1.0f, 1.0f, 1.0f);
 	for (int i = 0; i < 50; i++) { // depth = 50
@@ -43,17 +43,17 @@ __device__ glm::vec3 Framebuffer::color(const Ray& ray, HittableList* world, uti
 		}
 		else {
 			glm::vec3 direction = glm::normalize(currentRay.getDirection());
-			float a = 0.5f * (direction.y + 1.0f);
-			glm::vec3 c = (1.0f - a) * glm::vec3(1.0f, 1.0f, 1.0f) + a * glm::vec3(0.5f, 0.7f, 1.0f);
+			float4 envColor = texCubemap<float4>(cubemapTexture, direction.x, direction.y, direction.z);
+			glm::vec3 c = glm::vec3(envColor.x, envColor.y, envColor.z);
 			return attenuation * c;
 		}
 	}
 	return glm::vec3(0.0f, 0.0f, 0.0f); // exceeded recursion depth
 }
 
-__device__ glm::vec3 Framebuffer::colorPixel(int i, int j, int nx, int ny, Camera* camera, HittableList* world, utils::random::RNG& rng) {
+__device__ glm::vec3 Framebuffer::colorPixel(int i, int j, int nx, int ny, Camera* camera, HittableList* world, cudaTextureObject_t cubemapTexture, utils::random::RNG& rng) {
 	Ray r = camera->getRay(i, j, rng);
-	glm::vec3 col = color(r, world, rng);
+	glm::vec3 col = color(r, world, cubemapTexture, rng);
 	return col;
 }
 

@@ -95,6 +95,7 @@ void CudaRenderer::setupScene(Camera& camera) {
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 
+	skybox.allocCubemap();
 	createWorld<<<1, 1>>>(d_List, d_World, d_vertices, d_indices, d_meshDescriptors, meshAmount, d_meshes, d_bvhNodes, numObjects);
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
@@ -120,7 +121,7 @@ int CudaRenderer::render(Camera& camera, bool resetFrameIndex) { // TODO: profil
 	dim3 blocks(imgWidth / xBlock + 1, imgHeight / yBlock + 1);
 	dim3 threads(xBlock, yBlock);
 
-	renderScene<<<blocks, threads>>>(d_Fb, d_camera, d_World, d_randStates, frameIndex, surfObj);
+	renderScene<<<blocks, threads>>>(d_Fb, d_camera, d_World, d_randStates, frameIndex, skybox.getTextureObject(), surfObj);
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 	frameIndex++;
@@ -132,13 +133,14 @@ int CudaRenderer::render(Camera& camera, bool resetFrameIndex) { // TODO: profil
 	return 0;
 }
 
-void CudaRenderer::destroyScene() const {
+void CudaRenderer::destroyScene() {
+	skybox.destroyGPUBuffers();
 	destroyWorld<<<1, 1>>>(d_List, d_World, d_meshes);
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 }
 
-void CudaRenderer::setMeshData(std::vector<glm::vec3> vertexArray, std::vector<int> indexArray, std::vector<MeshDescriptor> descriptors) {
+void CudaRenderer::setMeshData(std::vector<glm::vec3>& vertexArray, std::vector<int>& indexArray, std::vector<MeshDescriptor>& descriptors) {
 	h_vertices = vertexArray;
 	h_indices = indexArray;
 	meshDescriptors = descriptors;

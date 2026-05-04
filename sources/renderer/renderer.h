@@ -22,6 +22,7 @@
 #include "kernel/kernel.h"
 #include "bvh/bvh.h"
 #include "aabb/aabb.h"
+#include "cubemap/cubemap.h"
 
 
 class IRenderer {
@@ -34,6 +35,7 @@ public:
 
 class CudaRenderer : public IRenderer {
 private:
+	Cubemap skybox{};
 	Framebuffer h_Fb;
 	Framebuffer* d_Fb = nullptr;
 	Camera* d_camera = nullptr;
@@ -47,8 +49,8 @@ private:
 	std::vector<MeshDescriptor> meshDescriptors;
 	std::vector<glm::vec3> h_vertices;
 	std::vector<int> h_indices;
-	cudaGraphicsResource* glResource = nullptr;
 	BVHBuilder builder{};
+	cudaGraphicsResource* glResource = nullptr;
 protected:
 	HittableList* scene;
 	int imgWidth = 400;
@@ -81,11 +83,12 @@ public:
 	virtual int getNumMeshes() const { return numMeshes; };
 	virtual void setNumObjects(int newNumObjects) { numObjects = newNumObjects; };
 	virtual int getNumObjects() const { return numObjects; };
-	virtual void setHostMeshes(std::vector<MeshDescriptor> newMeshes) { meshDescriptors = newMeshes; };
-	virtual void setMeshData(std::vector<glm::vec3> vertexArray, std::vector<int> indexArray, std::vector<MeshDescriptor> descriptors);
+	virtual void setHostMeshes(std::vector<MeshDescriptor>& newMeshes) { meshDescriptors = newMeshes; };
+	virtual void setMeshData(std::vector<glm::vec3>& vertexArray, std::vector<int>& indexArray, std::vector<MeshDescriptor>& descriptors);
+	virtual void setSkybox(Cubemap&& newSkybox) { skybox = std::move(newSkybox); };
 	void registerGLTexture(GLuint glTex);
 	virtual void setupScene(Camera& camera);
-	virtual void destroyScene() const;
+	virtual void destroyScene();
 	virtual int render(Camera& camera, bool resetFrameIndex) override;
 	virtual std::vector<MeshDescriptor> getHostMeshes() const { return meshDescriptors; };
 	std::shared_ptr<glm::vec3[]> getHostPixels() const { return h_Fb.getHostPixels(); };

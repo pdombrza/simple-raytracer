@@ -1,6 +1,6 @@
 #include "kernel.h"
 
-__global__ void renderScene(Framebuffer* d_Fb, Camera* camera, HittableList* world, curandState *randState, int frameIndex, cudaSurfaceObject_t surfObj) {
+__global__ void renderScene(Framebuffer* d_Fb, Camera* camera, HittableList* world, curandState *randState, int frameIndex, cudaTextureObject_t cubemapTexture, cudaSurfaceObject_t surfObj) {
 	int x = d_Fb->getWidth();
 	int y = d_Fb->getHeight();
     int i = threadIdx.x + blockIdx.x * blockDim.x;
@@ -9,7 +9,7 @@ __global__ void renderScene(Framebuffer* d_Fb, Camera* camera, HittableList* wor
     int pixelIdx = j * x + i;
 	curandState* localRandState = &randState[pixelIdx];
 	utils::random::RNG rng(localRandState);
-	glm::vec3 col = d_Fb->colorPixel(i, j, x, y, camera, world, rng);
+	glm::vec3 col = d_Fb->colorPixel(i, j, x, y, camera, world, cubemapTexture, rng);
 	if (d_Fb->isBad(col)) col = glm::vec3(0.0f);
 	d_Fb->writePixel(i, j, col, frameIndex);
 	float4 pixelColor = d_Fb->getPixels()[pixelIdx];
@@ -39,11 +39,11 @@ __global__ void createWorld(Hittable** d_List, HittableList* d_World, glm::vec3*
 		d_List[1] = new Sphere(glm::vec3(1.0f, 0.0f, -1.0f), 0.5f, new Metal(glm::vec3(0.8f, 0.6f, 0.2f), 0.5f));
 		d_List[2] = new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.5f, new Dielectric(1.5f));
 		d_List[3] = new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.45f, new Dielectric(1.0f / 1.5f));
-		Material* floorMaterial = new Lambertian(glm::vec3(0.8f, 0.8f, 0.0f));
-		d_List[4] = new Triangle(glm::vec3(-100.f, -0.5f, 100.f), glm::vec3(-100.f, -0.5f, -100.f), glm::vec3(100.f, -0.5f, -100.f), floorMaterial);
-		d_List[5] = new Triangle(glm::vec3(-100.f, -0.5f, 100.f), glm::vec3(100.f, -0.5f, -100.f), glm::vec3(100.f, -0.5f, 100.f), floorMaterial);
+		//Material* floorMaterial = new Lambertian(glm::vec3(0.8f, 0.8f, 0.0f));
+		//d_List[4] = new Triangle(glm::vec3(-100.f, -0.5f, 100.f), glm::vec3(-100.f, -0.5f, -100.f), glm::vec3(100.f, -0.5f, -100.f), floorMaterial);
+		//d_List[5] = new Triangle(glm::vec3(-100.f, -0.5f, 100.f), glm::vec3(100.f, -0.5f, -100.f), glm::vec3(100.f, -0.5f, 100.f), floorMaterial);
 
-		Material* mat = new Dielectric(1.0f / 1.5f);
+		Material* mat = new Lambertian(glm::vec3(0.7f, 0.7f, 0.7f));
 		d_meshes[0] = Mesh(vertexArray, indexArray, 0, d_bvhNodes, mat);
 		new(d_World) HittableList(d_List, objCount, d_meshes, 1, objCount);
 	}

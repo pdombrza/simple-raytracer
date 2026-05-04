@@ -20,6 +20,7 @@ add_subdirectory(thirdparty/glm)
 add_subdirectory(thirdparty/glfw)
 add_subdirectory(thirdparty/glad)
 add_subdirectory(thirdparty/tinyobjloader)
+add_subdirectory(thirdparty/stb_image)
 
 # CUDA 
 find_package(CUDAToolkit REQUIRED)
@@ -56,11 +57,13 @@ add_subdirectory(sources/shader)
 add_subdirectory(sources/mesh)
 add_subdirectory(sources/aabb)
 add_subdirectory(sources/bvh)
+add_subdirectory(sources/cubemap)
 
 
 add_compile_definitions(SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
 add_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC SHADERS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/shaders/")
 add_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC MODELS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/models/")
+add_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC CUBEMAP_PATH="${CMAKE_CURRENT_SOURCE_DIR}/cubemap/")
 add_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC GLM_ENABLE_EXPERIMENTAL)
 
 target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES} )
@@ -82,6 +85,6 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${CUDAToolkit_INCLUDE_DIRS})
 
 
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Kernel Ray Window Renderer Shader)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE Kernel Ray Window Renderer Shader Cubemap)
 
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm glfw glad tinyobjloader)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm glfw glad tinyobjloader stb_image)

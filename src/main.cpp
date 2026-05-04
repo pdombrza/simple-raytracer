@@ -25,6 +25,7 @@
 #include "window/windinput.h"
 #include "aabb/aabb.h"
 #include "bvh/bvh.h"
+#include "cubemap/cubemap.h"
 
 void processInput(GLFWwindow* window);
 void addBoxToScene(std::vector<glm::vec3>& vertices, std::vector<int>& indices, std::vector<MeshDescriptor>& descriptors);
@@ -208,10 +209,21 @@ int main() {
 
 		//addBoxToScene(h_vertices, h_indices, h_meshDescriptors);
 		//addPyramidToScene(h_vertices, h_indices, h_meshDescriptors);
+		std::vector<std::string> faces = {
+			CUBEMAP_PATH "right.jpg",
+			CUBEMAP_PATH "left.jpg",
+			CUBEMAP_PATH "top.jpg",
+			CUBEMAP_PATH "bottom.jpg",
+			CUBEMAP_PATH "front.jpg",
+			CUBEMAP_PATH "back.jpg"
+		};
+		Cubemap skybox{};
+		skybox.loadCubemap(faces);
 		CudaRenderer renderer(&scene, width, height);
-		renderer.setNumObjects(6);
+		renderer.setNumObjects(4);
 		renderer.setNumMeshes(1);	
 		renderer.setMeshData(h_vertices, h_indices, h_meshDescriptors);
+		renderer.setSkybox(std::move(skybox));
 		renderer.registerGLTexture(glTex);
 		renderer.setupScene(h_camera);
 		shader.use();
